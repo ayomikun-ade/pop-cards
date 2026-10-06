@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { BatchConfig, CardMemberData, TemplateId } from '../types';
-import { TEMPLATES } from '../templates';
-import { ImageCropperModal } from './ImageCropperModal';
+import React, { useState } from "react";
+import { BatchConfig, CardMemberData, TemplateId } from "../types";
+import { TEMPLATES } from "../templates";
+import { ImageCropperModal } from "./ImageCropperModal";
 import {
   Upload,
   Camera,
@@ -11,7 +11,7 @@ import {
   CheckCircle2,
   Eye,
   EyeOff,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface MemberCardFormProps {
   batch: BatchConfig;
@@ -28,12 +28,13 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
 }) => {
   const [cropperOpen, setCropperOpen] = useState(false);
   const [rawImageSrc, setRawImageSrc] = useState<string | null>(null);
-  const [excoCodeInput, setExcoCodeInput] = useState('');
+  const [excoCodeInput, setExcoCodeInput] = useState("");
   const [showExcoInput, setShowExcoInput] = useState(false);
   const [isExcoUnlocked, setIsExcoUnlocked] = useState(false);
   const [excoError, setExcoError] = useState(false);
 
-  const activeTemplate = TEMPLATES[batch.templateId] || TEMPLATES['classic-wave'];
+  const activeTemplate =
+    TEMPLATES[batch.templateId] || TEMPLATES["classic-wave"];
 
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,9 +71,12 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
           <span>•</span>
           <span>{batch.cdsName}</span>
         </div>
-        <h2 className="text-2xl font-black text-slate-800">Create Your POP Card</h2>
+        <h2 className="text-2xl font-black text-slate-800">
+          Create Your POP Card
+        </h2>
         <p className="text-slate-500 text-sm mt-1">
-          Fill in your details below. Your card updates in real-time as you type!
+          Fill in your details below. Your card updates in real-time as you
+          type!
         </p>
       </div>
 
@@ -94,12 +98,14 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
                   onClick={() => onTemplateChange(tid)}
                   className={`p-3 rounded-xl border text-left transition flex flex-col justify-between ${
                     isSelected
-                      ? 'border-emerald-600 bg-emerald-50/70 text-emerald-900'
-                      : 'border-slate-200 hover:border-slate-300 text-slate-600 bg-slate-50/50'
+                      ? "border-emerald-600 bg-emerald-50/70 text-emerald-900"
+                      : "border-slate-200 hover:border-slate-300 text-slate-600 bg-slate-50/50"
                   }`}
                 >
                   <span className="font-bold text-xs">{tmpl.name}</span>
-                  <span className="text-[10px] text-slate-400 mt-1 line-clamp-1">{tmpl.recommendedCropShape}</span>
+                  <span className="text-[10px] text-slate-400 mt-1 line-clamp-1">
+                    {tmpl.recommendedCropShape}
+                  </span>
                 </button>
               );
             })}
@@ -111,7 +117,9 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
       <div className="flex flex-col gap-2">
         <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
           <span>Portrait Photograph *</span>
-          <span className="text-[11px] font-normal text-slate-400">NYSC Khaki / White recommended</span>
+          <span className="text-[11px] font-normal text-slate-400">
+            NYSC Khaki / White recommended
+          </span>
         </label>
 
         <div className="flex items-center gap-4">
@@ -130,7 +138,9 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
           <div className="flex-1 flex flex-col gap-2">
             <label className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold cursor-pointer transition">
               <Upload className="w-4 h-4 text-emerald-400" />
-              <span>{member.photoUrl ? 'Change Photo' : 'Upload Portrait'}</span>
+              <span>
+                {member.photoUrl ? "Change Photo" : "Upload Portrait"}
+              </span>
               <input
                 type="file"
                 accept="image/*"
@@ -172,7 +182,7 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
       </div>
 
       {/* 3. CDS Role (with Exco Code Guard if configured) */}
-      {batch.defaultFields.find((f) => f.key === 'role')?.enabled && (
+      {batch.defaultFields.find((f) => f.key === "role")?.enabled && (
         <div className="flex flex-col gap-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
@@ -191,7 +201,7 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
           </div>
 
           <select
-            value={member.role || 'Member'}
+            value={member.role || "Member"}
             onChange={(e) => onChange({ role: e.target.value })}
             className="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-slate-800 text-sm font-medium outline-hidden"
           >
@@ -200,7 +210,7 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
               .filter((r) => !r.isExco || isExcoUnlocked)
               .map((r) => (
                 <option key={r.label} value={r.label}>
-                  {r.label} {r.isExco ? '★' : ''}
+                  {r.label} {r.isExco ? "★" : ""}
                 </option>
               ))}
           </select>
@@ -250,19 +260,21 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
       )}
 
       {/* 4. Skills (Max 5 items, comma separated) */}
-      {batch.defaultFields.find((f) => f.key === 'skills')?.enabled && (
+      {batch.defaultFields.find((f) => f.key === "skills")?.enabled && (
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex justify-between">
             <span>Skills</span>
-            <span className="text-[11px] font-normal text-slate-400">Comma separated (max 5)</span>
+            <span className="text-[11px] font-normal text-slate-400">
+              Comma separated (max 5)
+            </span>
           </label>
           <input
             type="text"
-            value={(member.skills || []).join(', ')}
+            value={(member.skills || []).join(", ")}
             maxLength={60}
             onChange={(e) => {
               const items = e.target.value
-                .split(',')
+                .split(",")
                 .map((s) => s.trim())
                 .filter(Boolean)
                 .slice(0, 5);
@@ -276,16 +288,22 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
 
       {/* 5. Social Handles (Separate fields as requested) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {batch.defaultFields.find((f) => f.key === 'tiktok')?.enabled && (
+        {batch.defaultFields.find((f) => f.key === "tiktok")?.enabled && (
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-bold uppercase text-slate-600">TikTok</label>
+            <label className="text-[11px] font-bold uppercase text-slate-600">
+              TikTok
+            </label>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-slate-400 text-xs font-bold">@</span>
+              <span className="absolute left-3 top-2.5 text-slate-400 text-xs font-bold">
+                @
+              </span>
               <input
                 type="text"
-                value={member.tiktok?.replace(/^@/, '') || ''}
+                value={member.tiktok?.replace(/^@/, "") || ""}
                 maxLength={25}
-                onChange={(e) => onChange({ tiktok: e.target.value.replace(/^@/, '') })}
+                onChange={(e) =>
+                  onChange({ tiktok: e.target.value.replace(/^@/, "") })
+                }
                 placeholder="username"
                 className="w-full pl-7 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:border-emerald-600 outline-hidden font-medium"
               />
@@ -293,16 +311,22 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
           </div>
         )}
 
-        {batch.defaultFields.find((f) => f.key === 'instagram')?.enabled && (
+        {batch.defaultFields.find((f) => f.key === "instagram")?.enabled && (
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-bold uppercase text-slate-600">Instagram</label>
+            <label className="text-[11px] font-bold uppercase text-slate-600">
+              Instagram
+            </label>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-slate-400 text-xs font-bold">@</span>
+              <span className="absolute left-3 top-2.5 text-slate-400 text-xs font-bold">
+                @
+              </span>
               <input
                 type="text"
-                value={member.instagram?.replace(/^@/, '') || ''}
+                value={member.instagram?.replace(/^@/, "") || ""}
                 maxLength={25}
-                onChange={(e) => onChange({ instagram: e.target.value.replace(/^@/, '') })}
+                onChange={(e) =>
+                  onChange({ instagram: e.target.value.replace(/^@/, "") })
+                }
                 placeholder="username"
                 className="w-full pl-7 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:border-emerald-600 outline-hidden font-medium"
               />
@@ -310,16 +334,22 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
           </div>
         )}
 
-        {batch.defaultFields.find((f) => f.key === 'x')?.enabled && (
+        {batch.defaultFields.find((f) => f.key === "x")?.enabled && (
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-bold uppercase text-slate-600">X (Twitter)</label>
+            <label className="text-[11px] font-bold uppercase text-slate-600">
+              X (Twitter)
+            </label>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-slate-400 text-xs font-bold">@</span>
+              <span className="absolute left-3 top-2.5 text-slate-400 text-xs font-bold">
+                @
+              </span>
               <input
                 type="text"
-                value={member.x?.replace(/^@/, '') || ''}
+                value={member.x?.replace(/^@/, "") || ""}
                 maxLength={25}
-                onChange={(e) => onChange({ x: e.target.value.replace(/^@/, '') })}
+                onChange={(e) =>
+                  onChange({ x: e.target.value.replace(/^@/, "") })
+                }
                 placeholder="username"
                 className="w-full pl-7 pr-3 py-2 text-xs rounded-xl border border-slate-200 focus:border-emerald-600 outline-hidden font-medium"
               />
@@ -329,19 +359,21 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
       </div>
 
       {/* 6. Hobbies */}
-      {batch.defaultFields.find((f) => f.key === 'hobbies')?.enabled && (
+      {batch.defaultFields.find((f) => f.key === "hobbies")?.enabled && (
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex justify-between">
             <span>Hobbies</span>
-            <span className="text-[11px] font-normal text-slate-400">Comma separated (max 5)</span>
+            <span className="text-[11px] font-normal text-slate-400">
+              Comma separated (max 5)
+            </span>
           </label>
           <input
             type="text"
-            value={(member.hobbies || []).join(', ')}
+            value={(member.hobbies || []).join(", ")}
             maxLength={60}
             onChange={(e) => {
               const items = e.target.value
-                .split(',')
+                .split(",")
                 .map((s) => s.trim())
                 .filter(Boolean)
                 .slice(0, 5);
@@ -354,14 +386,14 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
       )}
 
       {/* 7. After POP? */}
-      {batch.defaultFields.find((f) => f.key === 'afterPop')?.enabled && (
+      {batch.defaultFields.find((f) => f.key === "afterPop")?.enabled && (
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
             After POP? (Next Chapter)
           </label>
           <input
             type="text"
-            value={member.afterPop || ''}
+            value={member.afterPop || ""}
             maxLength={85}
             onChange={(e) => onChange({ afterPop: e.target.value })}
             placeholder="e.g. Secure a great tech job, travel, and grow my startup"
@@ -369,20 +401,20 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
           />
           <div className="flex justify-between text-[11px] text-slate-400 px-1">
             <span>Keep it inspiring and concise</span>
-            <span>{(member.afterPop || '').length}/85</span>
+            <span>{(member.afterPop || "").length}/85</span>
           </div>
         </div>
       )}
 
       {/* 8. Favorite Quote / Motto */}
-      {batch.defaultFields.find((f) => f.key === 'quote')?.enabled && (
+      {batch.defaultFields.find((f) => f.key === "quote")?.enabled && (
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
             Favorite Quote / Bible Verse / Motto
           </label>
           <textarea
             rows={2}
-            value={member.quote || ''}
+            value={member.quote || ""}
             maxLength={115}
             onChange={(e) => onChange({ quote: e.target.value })}
             placeholder="e.g. I can do all things through Christ who strengthens me"
@@ -390,7 +422,7 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
           />
           <div className="flex justify-between text-[11px] text-slate-400 px-1">
             <span>Formatted in quotation marks on the card</span>
-            <span>{(member.quote || '').length}/115</span>
+            <span>{(member.quote || "").length}/115</span>
           </div>
         </div>
       )}
@@ -399,11 +431,11 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
       {batch.customFields.map((cf) => (
         <div key={cf.id} className="flex flex-col gap-1.5">
           <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-            {cf.label} {cf.required && '*'}
+            {cf.label} {cf.required && "*"}
           </label>
           <input
             type="text"
-            value={member.customValues?.[cf.id] || ''}
+            value={member.customValues?.[cf.id] || ""}
             maxLength={cf.maxLength || 45}
             onChange={(e) =>
               onChange({
@@ -423,7 +455,9 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
       <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-100 flex items-start gap-3 text-xs text-emerald-800">
         <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
         <span>
-          <strong>100% Client-Side Privacy:</strong> Your photo and answers are generated directly inside your browser. No personal photos are stored on our servers.
+          <strong>100% Privacy:</strong> Your photo and answers are generated
+          directly inside your browser. No personal photos are stored on our
+          servers.
         </span>
       </div>
 

@@ -11,7 +11,10 @@ import { Eye, Edit3, Lock, AlertCircle } from "lucide-react";
 
 export const MemberBatchPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const batchData = useQuery(api.batches.getBatchBySlug, slug ? { slug } : "skip");
+  const batchData = useQuery(
+    api.batches.getBatchBySlug,
+    slug ? { slug } : "skip",
+  );
 
   const [mobileTab, setMobileTab] = useState<"form" | "preview">("form");
 
@@ -38,7 +41,8 @@ export const MemberBatchPage: React.FC = () => {
   const activeBatch: BatchConfig | null = useMemo(() => {
     if (!batchData) return null;
     const matchedPalette =
-      PRESET_PALETTES.find((p) => p.id === batchData.paletteId) || DEFAULT_PALETTE;
+      PRESET_PALETTES.find((p) => p.id === batchData.paletteId) ||
+      DEFAULT_PALETTE;
 
     return {
       slug: batchData.slug,
@@ -66,7 +70,9 @@ export const MemberBatchPage: React.FC = () => {
   if (batchData === undefined) {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-        <div className="text-slate-500 font-semibold text-sm">Loading batch details...</div>
+        <div className="text-slate-500 font-semibold text-sm">
+          Loading batch details...
+        </div>
       </div>
     );
   }
@@ -81,7 +87,8 @@ export const MemberBatchPage: React.FC = () => {
           </div>
           <h2 className="text-lg font-bold text-slate-800">Batch Not Found</h2>
           <p className="text-xs text-slate-500 mt-1 mb-6">
-            The link "/b/{slug}" is either expired or does not exist. Please check the URL with your CDS executives.
+            The link "/b/{slug}" is either expired or does not exist. Please
+            check the URL with your CDS executives.
           </p>
           <Link
             to="/"
@@ -102,7 +109,9 @@ export const MemberBatchPage: React.FC = () => {
           <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-4">
             <Lock className="w-6 h-6" />
           </div>
-          <h2 className="text-lg font-bold text-slate-800">Submissions Closed</h2>
+          <h2 className="text-lg font-bold text-slate-800">
+            Submissions Closed
+          </h2>
           <p className="text-xs font-semibold text-emerald-700 mt-1">
             {activeBatch.cdsName} • {activeBatch.batchName}
           </p>
@@ -132,21 +141,18 @@ export const MemberBatchPage: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-slate-900 text-base">{activeBatch.cdsName}</span>
+                <span className="font-extrabold text-slate-900 text-base">
+                  {activeBatch.cdsName}
+                </span>
                 <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-black uppercase">
                   POP Card
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">{activeBatch.batchName}</p>
+              <p className="text-[11px] text-slate-400">
+                {activeBatch.batchName}
+              </p>
             </div>
           </div>
-
-          <Link
-            to="/login"
-            className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
-          >
-            Admin Sign In
-          </Link>
         </div>
 
         {/* Mobile Tab Switcher */}
