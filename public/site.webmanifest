@@ -1,0 +1,17 @@
+{
+  "name": "POPCards - NYSC CDS POP Card Generator",
+  "short_name": "POPCards",
+  "description": "Generate high-resolution passing-out profile cards for NYSC CDS Groups.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#006837",
+  "theme_color": "#006837",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
