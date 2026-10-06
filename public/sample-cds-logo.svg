@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="cdsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBB03B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+    <radialGradient id="innerGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#FFFDF9" />
+    </radialGradient>
+  </defs>
+  <!-- Outer Gold Ring -->
+  <circle cx="100" cy="100" r="95" fill="url(#innerGrad)" stroke="url(#cdsGrad)" stroke-width="8" />
+  <circle cx="100" cy="100" r="85" fill="none" stroke="#006837" stroke-width="2" stroke-dasharray="4 2" />
+  
+  <!-- Laurel / Wreath Leaves -->
+  <path d="M 60 140 C 45 110 50 80 70 60 C 65 75 65 95 75 115 Z" fill="#006837" opacity="0.85" />
+  <path d="M 140 140 C 155 110 150 80 130 60 C 135 75 135 95 125 115 Z" fill="#006837" opacity="0.85" />
+  
+  <!-- Central Emblem: Open Book and Torch -->
+  <path d="M 75 125 C 90 120 100 123 100 123 C 100 123 110 120 125 125 L 125 105 C 110 100 100 103 100 103 C 100 103 90 100 75 105 Z" fill="#006837" />
+  <path d="M 100 72 L 95 98 L 105 98 Z" fill="#FBB03B" />
+  <path d="M 100 58 C 93 64 96 70 100 74 C 104 70 107 64 100 58 Z" fill="#EF4444" />
+  
+  <!-- Circular text path -->
+  <path id="textCircle" d="M 28 100 A 72 72 0 1 1 172 100 A 72 72 0 1 1 28 100" fill="none" />
+  <text font-family="Montserrat, Inter, sans-serif" font-size="11" font-weight="800" fill="#006837" letter-spacing="1.5">
+    <textPath href="#textCircle" startOffset="50%" text-anchor="middle">
+      COMMUNITY DEVELOPMENT SERVICE • NYSC
+    </textPath>
+  </text>
+</svg>
