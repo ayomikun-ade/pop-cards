@@ -9,6 +9,8 @@ import {
   Unlock,
   Sparkles,
   CheckCircle2,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 interface MemberCardFormProps {
@@ -27,6 +29,7 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
   const [cropperOpen, setCropperOpen] = useState(false);
   const [rawImageSrc, setRawImageSrc] = useState<string | null>(null);
   const [excoCodeInput, setExcoCodeInput] = useState('');
+  const [showExcoInput, setShowExcoInput] = useState(false);
   const [isExcoUnlocked, setIsExcoUnlocked] = useState(false);
   const [excoError, setExcoError] = useState(false);
 
@@ -205,20 +208,36 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
           {/* Exco Code Entry if user is an executive */}
           {batch.hasExcoCode && !isExcoUnlocked && (
             <div className="mt-2 pt-2 border-t border-slate-200 flex items-center gap-2">
-              <input
-                type="text"
-                value={excoCodeInput}
-                onChange={(e) => {
-                  setExcoCodeInput(e.target.value);
-                  setExcoError(false);
-                }}
-                placeholder="CDS Exco Code"
-                className="px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:border-emerald-600 outline-hidden w-36 uppercase font-mono"
-              />
+              <div className="relative">
+                <input
+                  type={showExcoInput ? "text" : "password"}
+                  value={excoCodeInput}
+                  onChange={(e) => {
+                    setExcoCodeInput(e.target.value);
+                    setExcoError(false);
+                  }}
+                  placeholder="CDS Exco Code"
+                  className="pl-3 pr-8 py-1.5 text-xs rounded-lg border border-slate-300 focus:border-emerald-600 outline-hidden w-38 uppercase font-mono"
+                />
+                {excoCodeInput && (
+                  <button
+                    type="button"
+                    onClick={() => setShowExcoInput(!showExcoInput)}
+                    className="absolute right-2 top-2 text-slate-400 hover:text-slate-600 transition p-0.5 cursor-pointer"
+                    title={showExcoInput ? "Hide code" : "Show code"}
+                  >
+                    {showExcoInput ? (
+                      <EyeOff className="w-3.5 h-3.5" />
+                    ) : (
+                      <Eye className="w-3.5 h-3.5" />
+                    )}
+                  </button>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={handleVerifyExcoCode}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold transition"
+                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold transition cursor-pointer"
               >
                 Unlock Exco
               </button>

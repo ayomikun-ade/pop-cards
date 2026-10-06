@@ -15,6 +15,8 @@ import {
   Trash2,
   AlertCircle,
   CheckCircle2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 export const BatchBuilderPage: React.FC = () => {
@@ -39,6 +41,7 @@ export const BatchBuilderPage: React.FC = () => {
   const [isActive, setIsActive] = useState(true);
   const [closedMessage, setClosedMessage] = useState("");
   const [excoCode, setExcoCode] = useState("");
+  const [showExcoCode, setShowExcoCode] = useState(false);
 
   // Logo file upload state
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -621,12 +624,26 @@ export const BatchBuilderPage: React.FC = () => {
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
-                type="text"
+                type={showExcoCode ? "text" : "password"}
                 value={excoCode}
                 onChange={(e) => setExcoCode(e.target.value)}
                 placeholder="e.g. TBC26X (leave blank if all roles are open)"
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-600 text-xs font-mono font-bold uppercase outline-hidden"
+                className="w-full pl-10 pr-11 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-600 text-xs font-mono font-bold uppercase outline-hidden"
               />
+              {excoCode && (
+                <button
+                  type="button"
+                  onClick={() => setShowExcoCode(!showExcoCode)}
+                  className="absolute right-3.5 top-2.5 text-slate-400 hover:text-slate-600 transition p-0.5 cursor-pointer"
+                  title={showExcoCode ? "Hide passcode" : "Show passcode"}
+                >
+                  {showExcoCode ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
