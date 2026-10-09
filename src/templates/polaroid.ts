@@ -1,11 +1,11 @@
-import { RenderContext } from './classicWave';
+import { RenderContext } from "./classicWave";
 import {
   loadImage,
   fitAndWrapText,
   drawImageCover,
-} from '../utils/canvasHelpers';
-import { drawSocialsRow } from '../utils/drawSocialIcons';
-import { drawProudlyServedStamp } from '../utils/drawStamp';
+} from "../utils/canvasHelpers";
+import { drawSocialsRow } from "../utils/drawSocialIcons";
+import { drawProudlyServedStamp } from "../utils/drawStamp";
 
 export async function renderPolaroid({
   canvas,
@@ -17,7 +17,7 @@ export async function renderPolaroid({
   nyscLogoUrl,
   cdsLogoUrl,
 }: RenderContext): Promise<void> {
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
   const W = 1080;
@@ -27,11 +27,11 @@ export async function renderPolaroid({
   canvas.height = H;
 
   // 1. Natural warm paper background
-  ctx.fillStyle = '#FAF7F2';
+  ctx.fillStyle = "#FAF7F2";
   ctx.fillRect(0, 0, W, H);
 
   // Subtle outer vintage border
-  ctx.strokeStyle = '#E7E2D8';
+  ctx.strokeStyle = "#E7E2D8";
   ctx.lineWidth = 2;
   ctx.strokeRect(28, 28, W - 56, H - 56);
 
@@ -39,29 +39,33 @@ export async function renderPolaroid({
   // Dual logos
   try {
     const nyscLogo = await loadImage(nyscLogoUrl);
-    ctx.drawImage(nyscLogo, 56, 50, 95, 95);
+    ctx.drawImage(nyscLogo, 56, 50, 95, 115);
   } catch (e) {
-    console.warn('NYSC logo load error', e);
+    console.warn("NYSC logo load error", e);
   }
 
   if (cdsLogoUrl) {
     try {
       const cdsLogo = await loadImage(cdsLogoUrl);
-      ctx.drawImage(cdsLogo, W - 151, 50, 95, 95);
+      ctx.drawImage(cdsLogo, W - 151, 70, 95, 95);
     } catch (e) {
-      console.warn('CDS logo load error', e);
+      console.warn("CDS logo load error", e);
     }
   }
 
   // Header Title Text
-  ctx.textAlign = 'center';
+  ctx.textAlign = "center";
   ctx.fillStyle = palette.primary;
-  ctx.font = '800 24px Montserrat, Inter, sans-serif';
-  ctx.fillText('NATIONAL YOUTH SERVICE CORPS', W / 2, 75);
+  ctx.font = "800 24px Montserrat, Inter, sans-serif";
+  ctx.fillText("NATIONAL YOUTH SERVICE CORPS", W / 2, 75);
 
-  ctx.fillStyle = '#64748B';
-  ctx.font = '700 18px Inter, sans-serif';
-  ctx.fillText(`${cdsName.toUpperCase()} • ${batchName.toUpperCase()}`, W / 2, 108);
+  ctx.fillStyle = "#64748B";
+  ctx.font = "700 18px Inter, sans-serif";
+  ctx.fillText(
+    `${cdsName.toUpperCase()} • ${batchName.toUpperCase()}`,
+    W / 2,
+    108,
+  );
 
   // Fine rule line
   ctx.strokeStyle = palette.primary;
@@ -78,9 +82,9 @@ export async function renderPolaroid({
   const polY = 160;
 
   // Clean polaroid frame
-  ctx.fillStyle = '#FFFFFF';
+  ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(polX, polY, polW, polH);
-  ctx.strokeStyle = '#E2E8F0';
+  ctx.strokeStyle = "#E2E8F0";
   ctx.lineWidth = 1.5;
   ctx.strokeRect(polX, polY, polW, polH);
 
@@ -101,21 +105,21 @@ export async function renderPolaroid({
       drawImageCover(ctx, photoImg, innerX, innerY, innerW, innerH);
       ctx.restore();
     } catch (e) {
-      console.warn('Polaroid photo render error', e);
+      console.warn("Polaroid photo render error", e);
     }
   } else {
-    ctx.fillStyle = '#F1F5F9';
+    ctx.fillStyle = "#F1F5F9";
     ctx.fillRect(innerX, innerY, innerW, innerH);
-    ctx.font = '600 28px Inter, sans-serif';
-    ctx.fillStyle = '#94A3B8';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Portrait Photo', innerX + innerW / 2, innerY + innerH / 2);
+    ctx.font = "600 28px Inter, sans-serif";
+    ctx.fillStyle = "#94A3B8";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Portrait Photo", innerX + innerW / 2, innerY + innerH / 2);
   }
 
   // Name stamped on the bottom polaroid chin
-  const nameUpper = (member.fullName || 'CORPS MEMBER').toUpperCase();
-  ctx.font = '900 38px Montserrat, Inter, sans-serif';
+  const nameUpper = (member.fullName || "CORPS MEMBER").toUpperCase();
+  ctx.font = "900 38px Montserrat, Inter, sans-serif";
   const { lines: nameLines } = fitAndWrapText(
     ctx,
     nameUpper,
@@ -123,16 +127,23 @@ export async function renderPolaroid({
     1,
     38,
     26,
-    'Montserrat, Inter, sans-serif',
-    900
+    "Montserrat, Inter, sans-serif",
+    900,
   );
-  ctx.fillStyle = '#1E293B';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
+  ctx.fillStyle = "#1E293B";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
   ctx.fillText(nameLines[0] || nameUpper, polX + polW / 2, polY + innerH + 75);
 
   // "PROUDLY SERVED" Authentic physical ink stamp overlapping lower-right corner of polaroid
-  drawProudlyServedStamp(ctx, polX + polW - 40, polY + innerH + 15, 62, palette.primary, -12);
+  drawProudlyServedStamp(
+    ctx,
+    polX + polW - 40,
+    polY + innerH + 15,
+    62,
+    palette.primary,
+    -12,
+  );
 
   // 4. Details Section (Clean authentic editorial layout - NO AI cards!)
   const startY = polY + polH + 45;
@@ -152,7 +163,7 @@ export async function renderPolaroid({
     const fy = startY + row * 110;
 
     // Subtle fine hairline divider above row
-    ctx.strokeStyle = '#E7E2D8';
+    ctx.strokeStyle = "#E7E2D8";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(fx, fy - 10);
@@ -160,9 +171,9 @@ export async function renderPolaroid({
     ctx.stroke();
 
     // Field Label
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.font = '800 16px Montserrat, Inter, sans-serif';
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.font = "800 16px Montserrat, Inter, sans-serif";
     ctx.fillStyle = palette.primary;
     ctx.fillText(field.label.toUpperCase(), fx, fy);
 
@@ -170,10 +181,18 @@ export async function renderPolaroid({
 
     // Socials with icons
     if (field.socials && field.socials.length > 0) {
-      drawSocialsRow(ctx, field.socials, fx, valY + 12, palette.primary, '#334155', 20);
+      drawSocialsRow(
+        ctx,
+        field.socials,
+        fx,
+        valY + 12,
+        palette.primary,
+        "#334155",
+        20,
+      );
     } else if (field.isQuote) {
-      ctx.font = '500 20px Inter, sans-serif';
-      ctx.fillStyle = '#334155';
+      ctx.font = "500 20px Inter, sans-serif";
+      ctx.fillStyle = "#334155";
       const { lines } = fitAndWrapText(
         ctx,
         `"${field.value.trim()}"`,
@@ -181,15 +200,15 @@ export async function renderPolaroid({
         2,
         20,
         15,
-        'Inter, sans-serif',
-        'italic 500'
+        "Inter, sans-serif",
+        "italic 500",
       );
       for (let i = 0; i < lines.length; i++) {
         ctx.fillText(lines[i], fx, valY + i * 24);
       }
     } else {
-      ctx.font = '600 21px Inter, sans-serif';
-      ctx.fillStyle = '#1E293B';
+      ctx.font = "600 21px Inter, sans-serif";
+      ctx.fillStyle = "#1E293B";
       const { lines } = fitAndWrapText(
         ctx,
         field.value,
@@ -197,8 +216,8 @@ export async function renderPolaroid({
         2,
         21,
         16,
-        'Inter, sans-serif',
-        600
+        "Inter, sans-serif",
+        600,
       );
       for (let i = 0; i < lines.length; i++) {
         ctx.fillText(lines[i], fx, valY + i * 25);
@@ -207,9 +226,9 @@ export async function renderPolaroid({
   });
 
   // 5. Classic Footer
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'bottom';
-  ctx.font = '700 20px Inter, sans-serif';
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  ctx.font = "700 20px Inter, sans-serif";
   ctx.fillStyle = palette.primary;
   ctx.fillText(`Passing Out Parade • Courtesy: ${cdsName}`, W / 2, H - 42);
 }

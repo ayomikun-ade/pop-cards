@@ -1,12 +1,12 @@
-import { RenderContext } from './classicWave';
+import { RenderContext } from "./classicWave";
 import {
   loadImage,
   fitAndWrapText,
   drawRoundedRect,
   drawImageCover,
-} from '../utils/canvasHelpers';
-import { drawSocialsRow } from '../utils/drawSocialIcons';
-import { drawProudlyServedStamp } from '../utils/drawStamp';
+} from "../utils/canvasHelpers";
+import { drawSocialsRow } from "../utils/drawSocialIcons";
+import { drawProudlyServedStamp } from "../utils/drawStamp";
 
 export async function renderSpotlight({
   canvas,
@@ -18,7 +18,7 @@ export async function renderSpotlight({
   nyscLogoUrl,
   cdsLogoUrl,
 }: RenderContext): Promise<void> {
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
   const W = 1080;
@@ -28,7 +28,7 @@ export async function renderSpotlight({
   canvas.height = H;
 
   // 1. Clean Ivory / Classic Card Background
-  ctx.fillStyle = '#FFFFFF';
+  ctx.fillStyle = "#FFFFFF";
   ctx.fillRect(0, 0, W, H);
 
   // Elegant double framing border
@@ -43,28 +43,32 @@ export async function renderSpotlight({
   // 2. Editorial Top Header
   try {
     const nyscLogo = await loadImage(nyscLogoUrl);
-    ctx.drawImage(nyscLogo, 60, 56, 90, 90);
+    ctx.drawImage(nyscLogo, 60, 56, 90, 110);
   } catch (e) {
-    console.warn('NYSC logo load error', e);
+    console.warn("NYSC logo load error", e);
   }
 
   if (cdsLogoUrl) {
     try {
       const cdsLogo = await loadImage(cdsLogoUrl);
-      ctx.drawImage(cdsLogo, W - 150, 56, 90, 90);
+      ctx.drawImage(cdsLogo, W - 150, 76, 90, 90);
     } catch (e) {
-      console.warn('CDS logo load error', e);
+      console.warn("CDS logo load error", e);
     }
   }
 
-  ctx.textAlign = 'center';
+  ctx.textAlign = "center";
   ctx.fillStyle = palette.primary;
-  ctx.font = '900 24px Montserrat, Inter, sans-serif';
-  ctx.fillText('NATIONAL YOUTH SERVICE CORPS', W / 2, 78);
+  ctx.font = "900 24px Montserrat, Inter, sans-serif";
+  ctx.fillText("NATIONAL YOUTH SERVICE CORPS", W / 2, 78);
 
-  ctx.font = '700 18px Inter, sans-serif';
-  ctx.fillStyle = '#64748B';
-  ctx.fillText(`${cdsName.toUpperCase()} • ${batchName.toUpperCase()}`, W / 2, 110);
+  ctx.font = "700 18px Inter, sans-serif";
+  ctx.fillStyle = "#64748B";
+  ctx.fillText(
+    `${cdsName.toUpperCase()} • ${batchName.toUpperCase()}`,
+    W / 2,
+    110,
+  );
 
   // Elegant divider line
   ctx.strokeStyle = palette.primary;
@@ -82,7 +86,7 @@ export async function renderSpotlight({
   const photoRadius = 16;
 
   // Crisp natural photo frame
-  ctx.fillStyle = '#FFFFFF';
+  ctx.fillStyle = "#FFFFFF";
   drawRoundedRect(ctx, photoX, photoY, photoW, photoH, photoRadius);
   ctx.fill();
 
@@ -95,37 +99,55 @@ export async function renderSpotlight({
       drawImageCover(ctx, photoImg, photoX, photoY, photoW, photoH);
       ctx.restore();
     } catch (e) {
-      console.warn('Spotlight photo render error', e);
+      console.warn("Spotlight photo render error", e);
     }
   } else {
-    ctx.fillStyle = '#F8FAFC';
+    ctx.fillStyle = "#F8FAFC";
     drawRoundedRect(ctx, photoX, photoY, photoW, photoH, photoRadius);
     ctx.fill();
-    ctx.font = '600 26px Inter, sans-serif';
-    ctx.fillStyle = '#94A3B8';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Portrait Photo (4:5)', photoX + photoW / 2, photoY + photoH / 2);
+    ctx.font = "600 26px Inter, sans-serif";
+    ctx.fillStyle = "#94A3B8";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(
+      "Portrait Photo (4:5)",
+      photoX + photoW / 2,
+      photoY + photoH / 2,
+    );
   }
 
   // Double border on portrait
-  ctx.strokeStyle = '#FFFFFF';
+  ctx.strokeStyle = "#FFFFFF";
   ctx.lineWidth = 6;
   drawRoundedRect(ctx, photoX, photoY, photoW, photoH, photoRadius);
   ctx.stroke();
 
   ctx.strokeStyle = palette.accent;
   ctx.lineWidth = 2;
-  drawRoundedRect(ctx, photoX - 2, photoY - 2, photoW + 4, photoH + 4, photoRadius + 2);
+  drawRoundedRect(
+    ctx,
+    photoX - 2,
+    photoY - 2,
+    photoW + 4,
+    photoH + 4,
+    photoRadius + 2,
+  );
   ctx.stroke();
 
   // "PROUDLY SERVED" Authentic physical ink stamp overlapping lower-right corner of portrait
-  drawProudlyServedStamp(ctx, photoX + photoW - 25, photoY + photoH - 20, 60, palette.primary, -14);
+  drawProudlyServedStamp(
+    ctx,
+    photoX + photoW - 25,
+    photoY + photoH - 20,
+    60,
+    palette.primary,
+    -14,
+  );
 
   // 4. Corper Name Heading
-  const nameUpper = (member.fullName || 'CORPS MEMBER').toUpperCase();
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
+  const nameUpper = (member.fullName || "CORPS MEMBER").toUpperCase();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
   ctx.fillStyle = palette.headingColor;
 
   const { lines: nameLines, lineHeight: nameLineHeight } = fitAndWrapText(
@@ -135,8 +157,8 @@ export async function renderSpotlight({
     2,
     42,
     28,
-    'Montserrat, Inter, sans-serif',
-    900
+    "Montserrat, Inter, sans-serif",
+    900,
   );
 
   let nameY = photoY + photoH + 24;
@@ -166,7 +188,7 @@ export async function renderSpotlight({
     const fy = detailsY + row * 95;
 
     // Subtle fine hairline divider
-    ctx.strokeStyle = '#E2E8F0';
+    ctx.strokeStyle = "#E2E8F0";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(fx, fy - 8);
@@ -174,9 +196,9 @@ export async function renderSpotlight({
     ctx.stroke();
 
     // Label
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.font = '800 16px Montserrat, Inter, sans-serif';
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.font = "800 16px Montserrat, Inter, sans-serif";
     ctx.fillStyle = palette.primary;
     ctx.fillText(field.label.toUpperCase(), fx, fy);
 
@@ -184,10 +206,18 @@ export async function renderSpotlight({
 
     // Socials with vector icons
     if (field.socials && field.socials.length > 0) {
-      drawSocialsRow(ctx, field.socials, fx, valY + 12, palette.primary, '#1E293B', 20);
+      drawSocialsRow(
+        ctx,
+        field.socials,
+        fx,
+        valY + 12,
+        palette.primary,
+        "#1E293B",
+        20,
+      );
     } else if (field.isQuote) {
-      ctx.font = '500 20px Inter, sans-serif';
-      ctx.fillStyle = '#334155';
+      ctx.font = "500 20px Inter, sans-serif";
+      ctx.fillStyle = "#334155";
       const { lines } = fitAndWrapText(
         ctx,
         `"${field.value.trim()}"`,
@@ -195,15 +225,15 @@ export async function renderSpotlight({
         2,
         20,
         15,
-        'Inter, sans-serif',
-        'italic 500'
+        "Inter, sans-serif",
+        "italic 500",
       );
       for (let i = 0; i < lines.length; i++) {
         ctx.fillText(lines[i], fx, valY + i * 24);
       }
     } else {
-      ctx.font = '600 21px Inter, sans-serif';
-      ctx.fillStyle = '#1E293B';
+      ctx.font = "600 21px Inter, sans-serif";
+      ctx.fillStyle = "#1E293B";
       const { lines } = fitAndWrapText(
         ctx,
         field.value,
@@ -211,8 +241,8 @@ export async function renderSpotlight({
         2,
         21,
         16,
-        'Inter, sans-serif',
-        600
+        "Inter, sans-serif",
+        600,
       );
       for (let i = 0; i < lines.length; i++) {
         ctx.fillText(lines[i], fx, valY + i * 25);
@@ -221,9 +251,9 @@ export async function renderSpotlight({
   });
 
   // 6. Commemorative Footer
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'bottom';
-  ctx.font = '700 20px Inter, sans-serif';
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  ctx.font = "700 20px Inter, sans-serif";
   ctx.fillStyle = palette.primary;
   ctx.fillText(`Passing Out Parade • Courtesy: ${cdsName}`, W / 2, H - 52);
 }

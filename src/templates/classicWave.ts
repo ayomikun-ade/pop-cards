@@ -1,12 +1,12 @@
-import { CardDisplayField, ColorPalette, CardMemberData } from '../types';
+import { CardDisplayField, ColorPalette, CardMemberData } from "../types";
 import {
   loadImage,
   fitAndWrapText,
   drawRoundedRect,
   drawImageCover,
-} from '../utils/canvasHelpers';
-import { drawSocialsRow } from '../utils/drawSocialIcons';
-import { drawProudlyServedStamp } from '../utils/drawStamp';
+} from "../utils/canvasHelpers";
+import { drawSocialsRow } from "../utils/drawSocialIcons";
+import { drawProudlyServedStamp } from "../utils/drawStamp";
 
 export interface RenderContext {
   canvas: HTMLCanvasElement;
@@ -29,7 +29,7 @@ export async function renderClassicWave({
   nyscLogoUrl,
   cdsLogoUrl,
 }: RenderContext): Promise<void> {
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
   const W = 1080;
@@ -45,7 +45,7 @@ export async function renderClassicWave({
   // 2. Gold/Accent Wave Shape
   ctx.fillStyle = palette.accent;
   ctx.beginPath();
-  ctx.moveTo(0, 310);
+  ctx.moveTo(0, 2800);
   ctx.bezierCurveTo(W * 0.25, 340, W * 0.6, 270, W, 220);
   ctx.lineTo(W, 360);
   ctx.bezierCurveTo(W * 0.7, 320, W * 0.4, 460, 0, 390);
@@ -76,47 +76,55 @@ export async function renderClassicWave({
   ctx.beginPath();
   ctx.moveTo(0, 0);
   ctx.lineTo(W, 0);
-  ctx.lineTo(W, headerHeight - 35);
-  ctx.bezierCurveTo(W * 0.6, headerHeight - 15, W * 0.3, headerHeight, 0, headerHeight);
+  ctx.lineTo(W, headerHeight - 65);
+  ctx.bezierCurveTo(
+    W * 0.6,
+    headerHeight - 15,
+    W * 0.25,
+    headerHeight + 55,
+    0,
+    headerHeight + 25,
+  );
+  ctx.lineTo(0, 0);
   ctx.closePath();
   ctx.fill();
 
   // Header separator line
-  ctx.strokeStyle = '#FFFFFF';
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(490, 165);
-  ctx.lineTo(490, 240);
-  ctx.lineTo(W, 230);
-  ctx.stroke();
+  // ctx.strokeStyle = '#FFFFFF';
+  // ctx.lineWidth = 3;
+  // ctx.beginPath();
+  // ctx.moveTo(490, 165);
+  // ctx.lineTo(490, 240);
+  // ctx.lineTo(W, 230);
+  // ctx.stroke();
 
   // 4. Logos & Header Titles
   try {
     const nyscLogo = await loadImage(nyscLogoUrl);
-    ctx.drawImage(nyscLogo, 45, 25, 120, 120);
+    ctx.drawImage(nyscLogo, 45, 25, 120, 150);
   } catch (err) {
-    console.warn('Could not render NYSC logo', err);
+    console.warn("Could not render NYSC logo", err);
   }
 
   if (cdsLogoUrl) {
     try {
       const cdsLogo = await loadImage(cdsLogoUrl);
-      ctx.drawImage(cdsLogo, 185, 25, 120, 120);
+      ctx.drawImage(cdsLogo, 185, 55, 120, 120);
     } catch (err) {
-      console.warn('Could not render CDS logo', err);
+      console.warn("Could not render CDS logo", err);
     }
   }
 
   // Header Title & Batch Tag
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'middle';
-  ctx.font = '800 28px Montserrat, Inter, sans-serif';
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.font = "800 28px Montserrat, Inter, sans-serif";
   ctx.fillStyle = palette.textOnPrimary;
-  ctx.fillText('NATIONAL YOUTH SERVICE CORPS', 330, 60);
+  ctx.fillText("NATIONAL YOUTH SERVICE CORPS", 330, 100);
 
-  ctx.font = '700 20px Montserrat, Inter, sans-serif';
+  ctx.font = "700 20px Montserrat, Inter, sans-serif";
   ctx.fillStyle = palette.accent;
-  ctx.fillText(`${batchName.toUpperCase()} • PASSING-OUT PARADE`, 330, 98);
+  ctx.fillText(`${batchName.toUpperCase()} • PASSING-OUT PARADE`, 330, 128);
 
   // 6. Member Photo Frame on Left (Square-like, vertically centered, no stretching)
   const photoW = 460;
@@ -125,11 +133,13 @@ export async function renderClassicWave({
   // Centered vertically in available space below top header
   const availableTop = 260;
   const availableBottom = H - 90;
-  const photoY = Math.round(availableTop + (availableBottom - availableTop - photoH) / 2);
+  const photoY = Math.round(
+    availableTop + (availableBottom - availableTop - photoH) / 2,
+  );
   const photoRadius = 20;
 
   // Photo backing (clean solid border without blur/glow)
-  ctx.fillStyle = '#FFFFFF';
+  ctx.fillStyle = "#FFFFFF";
   drawRoundedRect(ctx, photoX, photoY, photoW, photoH, photoRadius);
   ctx.fill();
 
@@ -143,42 +153,57 @@ export async function renderClassicWave({
       drawImageCover(ctx, photoImg, photoX, photoY, photoW, photoH);
       ctx.restore();
     } catch (err) {
-      console.warn('Could not render member photo', err);
+      console.warn("Could not render member photo", err);
     }
   } else {
     // Placeholder photo
-    ctx.fillStyle = '#E2E8F0';
+    ctx.fillStyle = "#E2E8F0";
     drawRoundedRect(ctx, photoX, photoY, photoW, photoH, photoRadius);
     ctx.fill();
-    ctx.font = '600 28px Inter, sans-serif';
-    ctx.fillStyle = '#64748B';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Portrait Photo (Square-like)', photoX + photoW / 2, photoY + photoH / 2);
+    ctx.font = "600 28px Inter, sans-serif";
+    ctx.fillStyle = "#64748B";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(
+      "Portrait Photo (Square-like)",
+      photoX + photoW / 2,
+      photoY + photoH / 2,
+    );
   }
 
   // Photo clean outer border
-  ctx.strokeStyle = '#FFFFFF';
+  ctx.strokeStyle = "#FFFFFF";
   ctx.lineWidth = 6;
   drawRoundedRect(ctx, photoX, photoY, photoW, photoH, photoRadius);
   ctx.stroke();
 
   // "PROUDLY SERVED" Authentic physical ink stamp overlapping lower-right corner of photo
-  drawProudlyServedStamp(ctx, photoX + photoW - 32, photoY + photoH - 24, 62, palette.primary, -15);
+  drawProudlyServedStamp(
+    ctx,
+    photoX + photoW - 32,
+    photoY + photoH - 24,
+    62,
+    palette.primary,
+    -15,
+  );
 
   // Clean Courtesy text centered below photo
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  ctx.font = '700 24px Inter, sans-serif';
-  ctx.fillStyle = '#334155';
-  ctx.fillText(`Courtesy: ${cdsName}`, photoX + photoW / 2, photoY + photoH + 32);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.font = "700 24px Inter, sans-serif";
+  ctx.fillStyle = "#334155";
+  ctx.fillText(
+    `Courtesy: ${cdsName}`,
+    photoX + photoW / 2,
+    photoY + photoH + 32,
+  );
 
   // 7. Right Side: Name Header and Display Fields (Vertically aligned with photo center)
   const fieldsX = 540;
   const contentWidth = W - fieldsX - 45;
 
   // Name calculation on right side
-  const nameUpper = (member.fullName || 'CORPS MEMBER').toUpperCase();
+  const nameUpper = (member.fullName || "CORPS MEMBER").toUpperCase();
   const { lines: nameLines, lineHeight: nameLineHeight } = fitAndWrapText(
     ctx,
     nameUpper,
@@ -186,38 +211,88 @@ export async function renderClassicWave({
     2,
     44,
     28,
-    'Montserrat, Inter, sans-serif',
-    900
+    "Montserrat, Inter, sans-serif",
+    900,
   );
 
   const nameBlockHeight = nameLines.length * nameLineHeight + 20; // name text + gap to divider
 
   const visibleFields = displayFields.slice(0, 7);
-  const baseGap = visibleFields.length <= 4 ? 32 : visibleFields.length <= 5 ? 26 : visibleFields.length === 6 ? 20 : 16;
+  const baseGap =
+    visibleFields.length <= 4
+      ? 32
+      : visibleFields.length <= 5
+        ? 26
+        : visibleFields.length === 6
+          ? 20
+          : 16;
 
   // Pre-calculate total height of right column (Name + Divider + Fields) to center against photo
   let totalFieldsHeight = nameBlockHeight + 16; // name + divider space
-  const measuredItems: { field: typeof visibleFields[0]; lines: string[]; isSocial: boolean; isQuote: boolean; blockHeight: number }[] = [];
+  const measuredItems: {
+    field: (typeof visibleFields)[0];
+    lines: string[];
+    isSocial: boolean;
+    isQuote: boolean;
+    blockHeight: number;
+  }[] = [];
 
   for (const field of visibleFields) {
-    if (!field.value && (!field.socials || field.socials.length === 0)) continue;
+    if (!field.value && (!field.socials || field.socials.length === 0))
+      continue;
 
     if (field.socials && field.socials.length > 0) {
       const blockHeight = 26 + 36;
-      measuredItems.push({ field, lines: [], isSocial: true, isQuote: false, blockHeight });
+      measuredItems.push({
+        field,
+        lines: [],
+        isSocial: true,
+        isQuote: false,
+        blockHeight,
+      });
       totalFieldsHeight += blockHeight + baseGap;
     } else if (field.isQuote) {
-      ctx.font = '500 24px Inter, sans-serif';
-      const quoteText = `"${field.value.replace(/^["“”]|["“”]$/g, '').trim()}"`;
-      const { lines, lineHeight } = fitAndWrapText(ctx, quoteText, contentWidth, 3, 24, 18, 'Inter, sans-serif', 'italic 500');
+      ctx.font = "500 24px Inter, sans-serif";
+      const quoteText = `"${field.value.replace(/^["“”]|["“”]$/g, "").trim()}"`;
+      const { lines, lineHeight } = fitAndWrapText(
+        ctx,
+        quoteText,
+        contentWidth,
+        3,
+        24,
+        18,
+        "Inter, sans-serif",
+        "italic 500",
+      );
       const blockHeight = 26 + lines.length * lineHeight;
-      measuredItems.push({ field, lines, isSocial: false, isQuote: true, blockHeight });
+      measuredItems.push({
+        field,
+        lines,
+        isSocial: false,
+        isQuote: true,
+        blockHeight,
+      });
       totalFieldsHeight += blockHeight + baseGap;
     } else {
-      ctx.font = '600 26px Inter, sans-serif';
-      const { lines, lineHeight } = fitAndWrapText(ctx, field.value, contentWidth, 2, 25, 18, 'Inter, sans-serif', 600);
+      ctx.font = "600 26px Inter, sans-serif";
+      const { lines, lineHeight } = fitAndWrapText(
+        ctx,
+        field.value,
+        contentWidth,
+        2,
+        25,
+        18,
+        "Inter, sans-serif",
+        600,
+      );
       const blockHeight = 26 + lines.length * lineHeight;
-      measuredItems.push({ field, lines, isSocial: false, isQuote: false, blockHeight });
+      measuredItems.push({
+        field,
+        lines,
+        isSocial: false,
+        isQuote: false,
+        blockHeight,
+      });
       totalFieldsHeight += blockHeight + baseGap;
     }
   }
@@ -228,13 +303,16 @@ export async function renderClassicWave({
 
   // Center right side vertically with respect to the photo
   const photoCenterY = photoY + photoH / 2;
-  let currentY = Math.max(availableTop + 15, Math.round(photoCenterY - totalFieldsHeight / 2));
+  let currentY = Math.max(
+    availableTop + 15,
+    Math.round(photoCenterY - totalFieldsHeight / 2),
+  );
 
   // Render Member Name on the right
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'top';
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
   ctx.fillStyle = palette.primary;
-  ctx.font = '900 44px Montserrat, Inter, sans-serif';
+  ctx.font = "900 44px Montserrat, Inter, sans-serif";
   for (const line of nameLines) {
     ctx.fillText(line, fieldsX, currentY);
     currentY += nameLineHeight;
@@ -254,9 +332,9 @@ export async function renderClassicWave({
     const { field, lines, isSocial, isQuote } = item;
 
     // Field Label
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.font = '800 20px Montserrat, Inter, sans-serif';
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.font = "800 20px Montserrat, Inter, sans-serif";
     ctx.fillStyle = palette.headingColor;
     ctx.fillText(field.label.toUpperCase(), fieldsX, currentY);
 
@@ -271,11 +349,11 @@ export async function renderClassicWave({
         valueY + 14,
         palette.headingColor,
         palette.textColor,
-        24
+        24,
       );
       currentY = valueY + 36 + baseGap;
     } else if (isQuote) {
-      ctx.font = '500 24px Inter, sans-serif';
+      ctx.font = "500 24px Inter, sans-serif";
       ctx.fillStyle = palette.textColor;
       const qLineHeight = 30;
       for (let i = 0; i < lines.length; i++) {
@@ -283,7 +361,7 @@ export async function renderClassicWave({
       }
       currentY = valueY + lines.length * qLineHeight + baseGap;
     } else {
-      ctx.font = '600 26px Inter, sans-serif';
+      ctx.font = "600 26px Inter, sans-serif";
       ctx.fillStyle = palette.textColor;
       const vLineHeight = 32;
       for (let i = 0; i < lines.length; i++) {
