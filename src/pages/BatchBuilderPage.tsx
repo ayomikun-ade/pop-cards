@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, useSearchParams } from "react-router-dom";
 import { PRESET_PALETTES } from "../utils/palettes";
 import { TEMPLATES } from "../templates";
 import { TemplateId } from "../types";
@@ -22,11 +22,18 @@ import {
 export const BatchBuilderPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const duplicateFromId = searchParams.get("duplicateFrom");
 
   const isEditing = !!id && id !== "new";
   const existingBatch = useQuery(
     api.batches.getBatchById,
     isEditing ? { id: id as any } : "skip"
+  );
+  
+  const duplicateBatch = useQuery(
+    api.batches.getBatchById,
+    duplicateFromId && !isEditing ? { id: duplicateFromId as any } : "skip"
   );
 
   const saveBatch = useMutation(api.batches.saveBatch);
@@ -105,6 +112,33 @@ export const BatchBuilderPage: React.FC = () => {
     }
   }, [existingBatch]);
 
+  // Load duplicated batch values if duplicating
+  useEffect(() => {
+    if (duplicateBatch && !isEditing) {
+      setCdsName(duplicateBatch.cdsName);
+      setBatchName(duplicateBatch.batchName + " (Copy)");
+      setTemplateId(duplicateBatch.templateId as TemplateId);
+      setPaletteId(duplicateBatch.paletteId);
+      setIsActive(duplicateBatch.isActive);
+      setClosedMessage(duplicateBatch.closedMessage || "");
+      setExcoCode(duplicateBatch.excoCode || "");
+      setDefaultFields(duplicateBatch.defaultFields);
+      setCustomFields(duplicateBatch.customFields);
+      setRoleOptions(duplicateBatch.roleOptions);
+      if (duplicateBatch.logoUrl) {
+        setExistingLogoUrl(duplicateBatch.logoUrl);
+        // Fetch the existing logo and set it as a new file so it uploads cleanly
+        fetch(duplicateBatch.logoUrl)
+          .then((res) => res.blob())
+          .then((blob) => {
+            const ext = blob.type.split("/")[1] || "png";
+            setLogoFile(new File([blob], `duplicated-logo.${ext}`, { type: blob.type }));
+          })
+          .catch((err) => console.warn("Failed to fetch duplicated logo:", err));
+      }
+    }
+  }, [duplicateBatch, isEditing]);
+
   // Auto-generate slug when CDS and batch name are typed (if new)
   const handleAutoSlug = (cds: string, batch: string) => {
     if (!isEditing) {
@@ -118,7 +152,8 @@ export const BatchBuilderPage: React.FC = () => {
 
   const handleAddCustomField = () => {
     if (customFields.length >= 5) {
-      alert("Maximum 5 custom fields allowed per batch");
+      setErrorMessage("Maximum 5 custom fields allowed per batch");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     const newId = `custom_${Date.now()}`;

@@ -24,6 +24,7 @@ export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ id: any; name: string } | null>(null);
 
   const handleCopyLink = (slug: string) => {
     const fullUrl = `${window.location.origin}/b/${slug}`;
@@ -32,10 +33,14 @@ export const DashboardPage: React.FC = () => {
     setTimeout(() => setCopiedSlug(null), 2500);
   };
 
-  const handleDeleteBatch = async (id: any, name: string) => {
-    if (window.confirm(`Are you sure you want to delete batch "${name}"? This cannot be undone.`)) {
-      await deleteBatch({ id });
-    }
+  const handleDeleteBatch = (id: any, name: string) => {
+    setDeleteConfirmation({ id, name });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmation) return;
+    await deleteBatch({ id: deleteConfirmation.id });
+    setDeleteConfirmation(null);
   };
 
   const handleSignOut = async () => {
@@ -206,18 +211,25 @@ export const DashboardPage: React.FC = () => {
                     <span>Open Form</span>
                   </a>
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Link
+                      to={`/admin/batches/new?duplicateFrom=${b._id}`}
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 font-semibold text-[11px] transition flex items-center gap-1.5"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Duplicate</span>
+                    </Link>
                     <Link
                       to={`/admin/batches/${b._id}`}
-                      className="p-2 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition"
-                      title="Edit Batch Settings"
+                      className="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-slate-300 hover:bg-slate-100 text-slate-600 hover:text-slate-900 font-semibold text-[11px] transition flex items-center gap-1.5"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Edit</span>
                     </Link>
                     <button
                       type="button"
                       onClick={() => handleDeleteBatch(b._id, b.batchName)}
-                      className="p-2 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-600 transition cursor-pointer"
+                      className="p-1.5 rounded-lg border border-transparent hover:bg-red-50 text-slate-400 hover:text-red-600 transition cursor-pointer"
                       title="Delete Batch"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -229,6 +241,34 @@ export const DashboardPage: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px]">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200">
+            <h3 className="text-xl font-black text-slate-900 mb-2">Delete Batch?</h3>
+            <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+              Are you sure you want to delete <strong>"{deleteConfirmation.name}"</strong>? This will permanently remove the batch and its logo.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmation(null)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition cursor-pointer shadow-sm shadow-red-600/20"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
