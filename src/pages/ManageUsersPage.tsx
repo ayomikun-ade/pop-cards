@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Link } from "react-router-dom";
 import {
@@ -7,19 +7,31 @@ import {
   UserPlus,
   ShieldAlert,
   CheckCircle2,
+  Lock,
+  Eye,
+  EyeOff,
+  Copy,
+  Check,
 } from "lucide-react";
 
 export const ManageUsersPage: React.FC = () => {
   const profile = useQuery(api.admins.getCurrentProfile);
   const admins = useQuery(api.admins.listAdmins);
-  const registerAdmin = useMutation(api.admins.registerAdminProfile);
+  const createAdminUser = useAction(api.admins.createAdminUser);
   const toggleStatus = useMutation(api.admins.toggleAdminStatus);
 
   const [newUsername, setNewUsername] = useState("");
   const [newDisplayName, setNewDisplayName] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [createdCredentials, setCreatedCredentials] = useState<{
+    username: string;
+    displayName: string;
+    password?: string;
+  } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   if (!profile || profile.role !== "superadmin") {
     return (
@@ -44,26 +56,38 @@ export const ManageUsersPage: React.FC = () => {
   const handleCreateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
-    setSuccessMsg(null);
     setIsSubmitting(true);
 
     try {
-      // In production Convex Auth, accounts are created by inviting or registering.
-      // We pass the userId or register their profile for access control.
-      await registerAdmin({
-        userId: profile.userId, // Link to organization or user scope
-        username: newUsername.trim().toLowerCase(),
+      await createAdminUser({
         displayName: newDisplayName.trim(),
+        username: newUsername.trim().toLowerCase(),
+        password: newPassword,
       });
 
-      setSuccessMsg(`Admin account "${newUsername}" created successfully.`);
+      setCreatedCredentials({
+        username: newUsername.trim().toLowerCase(),
+        displayName: newDisplayName.trim(),
+        password: newPassword,
+      });
       setNewUsername("");
       setNewDisplayName("");
+      setNewPassword("");
     } catch (err: any) {
-      setErrorMsg(err?.message || "Failed to create admin profile.");
+      setErrorMsg(err?.message || "Failed to create admin account.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleCopyCredentials = (username: string, pass?: string) => {
+    const textToCopy = pass
+      ? `Here are your POPCards Admin login details:\n• Login URL: ${window.location.origin}/login\n• Username: ${username}\n• Password: ${pass}`
+      : `POPCards Admin Username: ${username}\nLogin URL: ${window.location.origin}/login`;
+
+    navigator.clipboard.writeText(textToCopy);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   const handleToggleDisabled = async (profileId: any, currentDisabled: boolean) => {
@@ -100,10 +124,41 @@ export const ManageUsersPage: React.FC = () => {
             <h2 className="text-base font-bold text-slate-800">Add New Admin</h2>
           </div>
 
-          {successMsg && (
-            <div className="p-3 mb-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>{successMsg}</span>
+          {createdCredentials && (
+            <div className="p-4 mb-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900 flex flex-col gap-2">
+              <div className="flex items-center justify-between font-bold">
+                <span className="flex items-center gap-1.5 text-emerald-800">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  Account Ready to Share
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleCopyCredentials(
+                      createdCredentials.username,
+                      createdCredentials.password
+                    )
+                  }
+                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1 transition cursor-pointer"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Details</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <div className="font-mono bg-white/80 p-2.5 rounded-xl border border-emerald-100 flex flex-col gap-1 text-[11px]">
+                <p><strong>Username:</strong> {createdCredentials.username}</p>
+                <p><strong>Password:</strong> {createdCredentials.password}</p>
+                <p className="text-slate-400 text-[10px]">Login at: {window.location.origin}/login</p>
+              </div>
             </div>
           )}
 
@@ -140,6 +195,36 @@ export const ManageUsersPage: React.FC = () => {
                 placeholder="e.g. tbc_admin"
                 className="px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-600 text-sm font-medium outline-hidden"
               />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                Initial Password
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  minLength={6}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Minimum 6 characters"
+                  className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-600 text-sm font-medium outline-hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-2.5 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <button
@@ -183,19 +268,30 @@ export const ManageUsersPage: React.FC = () => {
                   <p className="text-xs text-slate-500 font-mono mt-0.5">@{adm.username}</p>
                 </div>
 
-                {adm.role !== "superadmin" && (
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => handleToggleDisabled(adm._id, adm.disabled)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer ${
-                      adm.disabled
-                        ? "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
-                        : "border-red-200 text-red-600 bg-red-50 hover:bg-red-100"
-                    }`}
+                    onClick={() => handleCopyCredentials(adm.username)}
+                    className="p-2 rounded-xl border border-slate-200 hover:bg-white text-slate-500 hover:text-slate-700 transition cursor-pointer"
+                    title="Copy username and login link"
                   >
-                    {adm.disabled ? "Enable" : "Disable"}
+                    <Copy className="w-4 h-4" />
                   </button>
-                )}
+
+                  {adm.role !== "superadmin" && (
+                    <button
+                      type="button"
+                      onClick={() => handleToggleDisabled(adm._id, adm.disabled)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition cursor-pointer ${
+                        adm.disabled
+                          ? "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+                          : "border-red-200 text-red-600 bg-red-50 hover:bg-red-100"
+                      }`}
+                    >
+                      {adm.disabled ? "Enable" : "Disable"}
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>

@@ -1,6 +1,7 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, action } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { getAuthUserId, createAccount } from "@convex-dev/auth/server";
+import { api } from "./_generated/api";
 
 /**
  * Get current user's profile and role (superadmin vs admin).
@@ -93,9 +94,9 @@ export const initSuperadmin = mutation({
 });
 
 /**
- * Superadmin registers an Admin account.
+ * Internal mutation to insert the admin profile record once auth account is created.
  */
-export const registerAdminProfile = mutation({
+export const insertAdminProfile = mutation({
   args: {
     userId: v.id("users"),
     username: v.string(),
@@ -116,7 +117,7 @@ export const registerAdminProfile = mutation({
 
     const cleanUsername = args.username.trim().toLowerCase();
 
-    // Check if username already exists
+    // Check if username already exists in profiles
     const existing = await ctx.db
       .query("adminProfiles")
       .withIndex("by_username", (q) => q.eq("username", cleanUsername))
@@ -136,6 +137,57 @@ export const registerAdminProfile = mutation({
     });
 
     return profileId;
+  },
+});
+
+/**
+ * Superadmin creates a new Admin account with an initial password.
+ */
+export const createAdminUser = action({
+  args: {
+    displayName: v.string(),
+    username: v.string(),
+    password: v.string(),
+  },
+  handler: async (ctx, args): Promise<string> => {
+    const callerId = await getAuthUserId(ctx);
+    if (!callerId) throw new Error("Unauthorized");
+
+    const cleanUsername = args.username.trim().toLowerCase();
+    if (!cleanUsername || cleanUsername.length < 3) {
+      throw new Error("Username must be at least 3 characters");
+    }
+    if (!args.password || args.password.length < 6) {
+      throw new Error("Password must be at least 6 characters");
+    }
+
+    const emailIdentifier = cleanUsername.includes("@")
+      ? cleanUsername
+      : `${cleanUsername}@popcards.local`;
+
+    // 1. Create auth account with password hashing via Convex Auth
+    const { user } = await createAccount(ctx, {
+      provider: "password",
+      account: {
+        id: emailIdentifier,
+        secret: args.password,
+      },
+      profile: {
+        name: args.displayName.trim(),
+        email: emailIdentifier,
+      },
+      shouldLinkViaEmail: false,
+      shouldLinkViaPhone: false,
+    });
+
+    // 2. Insert admin profile record linked to the created user ID
+    await ctx.runMutation(api.admins.insertAdminProfile, {
+      userId: user._id as any,
+      username: cleanUsername,
+      displayName: args.displayName.trim(),
+    });
+
+    return user._id;
   },
 });
 
