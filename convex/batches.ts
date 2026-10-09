@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+import { requireAdmin } from "./admins";
 
 /**
  * Public query: Fetch batch configuration by slug for corps members.
@@ -66,15 +66,13 @@ export const verifyExcoCode = query({
 export const listMyBatches = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return [];
-
-    const profile = await ctx.db
-      .query("adminProfiles")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
-      .first();
-
-    if (!profile) return [];
+    let session;
+    try {
+      session = await requireAdmin(ctx);
+    } catch {
+      return [];
+    }
+    const { userId, profile } = session;
 
     if (profile.role === "superadmin") {
       const allBatches = await ctx.db.query("batches").order("desc").collect();
@@ -96,18 +94,11 @@ export const listMyBatches = query({
 export const getBatchById = query({
   args: { id: v.id("batches") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
+    const { userId, profile } = await requireAdmin(ctx);
 
     const batch = await ctx.db.get(args.id);
     if (!batch) return null;
 
-    const profile = await ctx.db
-      .query("adminProfiles")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
-      .first();
-
-    if (!profile) throw new Error("Unauthorized");
     if (profile.role !== "superadmin" && batch.ownerId !== userId) {
       throw new Error("Unauthorized to access this batch");
     }
@@ -128,8 +119,7 @@ export const getBatchById = query({
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
+    await requireAdmin(ctx);
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -186,10 +176,14 @@ export const saveBatch = mutation({
     closedMessage: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
+    const { userId, profile } = await requireAdmin(ctx);
 
     const cleanSlug = args.slug.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "-");
+
+    if (args.cdsName.trim().length > 100) throw new Error("CDS Name must be under 100 characters");
+    if (args.batchName.trim().length > 100) throw new Error("Batch Name must be under 100 characters");
+    if (args.customFields.length > 10) throw new Error("Maximum of 10 custom fields allowed");
+    if (args.roleOptions.length > 30) throw new Error("Maximum of 30 role options allowed");
 
     // Check slug uniqueness
     const existingWithSlug = await ctx.db
@@ -208,13 +202,16 @@ export const saveBatch = mutation({
       const existing = await ctx.db.get(args.id);
       if (!existing) throw new Error("Batch not found");
 
-      const profile = await ctx.db
-        .query("adminProfiles")
-        .withIndex("by_userId", (q) => q.eq("userId", userId))
-        .first();
-
-      if (!profile || (profile.role !== "superadmin" && existing.ownerId !== userId)) {
+      if (profile.role !== "superadmin" && existing.ownerId !== userId) {
         throw new Error("Unauthorized to edit this batch");
+      }
+
+      if (args.logoStorageId && existing.logoStorageId && args.logoStorageId !== existing.logoStorageId) {
+        try {
+          await ctx.storage.delete(existing.logoStorageId);
+        } catch (e) {
+          console.warn("Storage deletion ignored", e);
+        }
       }
 
       await ctx.db.patch(args.id, {
@@ -267,18 +264,12 @@ export const saveBatch = mutation({
 export const deleteBatch = mutation({
   args: { id: v.id("batches") },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
+    const { userId, profile } = await requireAdmin(ctx);
 
     const batch = await ctx.db.get(args.id);
     if (!batch) return;
 
-    const profile = await ctx.db
-      .query("adminProfiles")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
-      .first();
-
-    if (!profile || (profile.role !== "superadmin" && batch.ownerId !== userId)) {
+    if (profile.role !== "superadmin" && batch.ownerId !== userId) {
       throw new Error("Unauthorized to delete this batch");
     }
 

@@ -205,7 +205,7 @@ export const LandingPage: React.FC = () => {
               <p className="text-sm text-slate-600 leading-relaxed">
                 Copy your customized batch URL (e.g.{" "}
                 <span className="font-mono text-xs bg-slate-100 px-1.5 py-0.5 rounded text-emerald-700 font-bold">
-                  cdscards.com/b/your-cds
+                  {window.location.host}/b/your-cds
                 </span>
                 ) and paste it into your CDS WhatsApp group.
               </p>

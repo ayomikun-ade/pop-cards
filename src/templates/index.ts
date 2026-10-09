@@ -1,6 +1,5 @@
 import { TemplateId } from "../types";
 import { RenderContext, renderClassicWave } from "./classicWave";
-// import { renderBoldSplit } from "./boldSplit";
 import { renderPolaroid } from "./polaroid";
 import { renderSpotlight } from "./spotlight";
 import { ensureFontsLoaded } from "../utils/canvasHelpers";
@@ -24,14 +23,6 @@ export const TEMPLATES: Record<TemplateId, TemplateDefinition> = {
     cropAspect: 460 / 550, // Square-like / 4:5 natural proportion
     recommendedCropShape: "rect",
   },
-  // 'bold-split': {
-  //  id: 'bold-split',
-  //  name: 'Bold Split',
-  //  description: 'High-impact split layout with generous portrait card and clean editorial typography.',
-  //  render: renderBoldSplit,
-  //  cropAspect: 460 / 550, // Square-like / 4:5 natural proportion
-  //  recommendedCropShape: 'rect',
-  //},
   polaroid: {
     id: "polaroid",
     name: "Polaroid Memory",

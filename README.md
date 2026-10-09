@@ -94,7 +94,7 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 3. **CDS Exco Batch Creation:**
    - Admins sign in at `/login` and access `/admin/batches/new`.
    - Customize CDS Group name, batch name, card template, colors, emblem logo, and form questions.
-   - Share the resulting link (`cdscards.com/b/your-cds-slug`) with members.
+   - Share the resulting link (`nysc-pop-cards.vercel.app/b/your-cds-slug`) with members.
 
 ---
 

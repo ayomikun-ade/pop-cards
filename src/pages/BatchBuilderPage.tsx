@@ -297,8 +297,8 @@ export const BatchBuilderPage: React.FC = () => {
               </span>
             </label>
             <div className="flex items-center">
-              <span className="px-3.5 py-2.5 rounded-l-xl bg-slate-100 border border-r-0 border-slate-200 text-xs font-mono text-slate-500">
-                cdscards.com/b/
+              <span className="px-3.5 py-2.5 rounded-l-xl bg-slate-100 border border-r-0 border-slate-200 text-xs font-mono text-slate-500 max-w-[150px] sm:max-w-none truncate">
+                {window.location.host}/b/
               </span>
               <input
                 type="text"

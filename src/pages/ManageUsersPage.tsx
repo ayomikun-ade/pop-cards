@@ -206,10 +206,10 @@ export const ManageUsersPage: React.FC = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   required
-                  minLength={6}
+                  minLength={8}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Minimum 6 characters"
+                  placeholder="Minimum 8 characters"
                   className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-600 text-sm font-medium outline-hidden"
                 />
                 <button

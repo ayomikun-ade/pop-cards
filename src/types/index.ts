@@ -1,4 +1,4 @@
-export type TemplateId = 'classic-wave' | 'bold-split' | 'polaroid' | 'spotlight';
+export type TemplateId = 'classic-wave' | 'polaroid' | 'spotlight';
 
 export interface ColorPalette {
   id: string;

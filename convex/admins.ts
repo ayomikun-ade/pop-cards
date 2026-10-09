@@ -1,7 +1,22 @@
-import { query, mutation, action } from "./_generated/server";
+import { query, mutation, action, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId, createAccount } from "@convex-dev/auth/server";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
+
+export async function requireAdmin(ctx: any) {
+  const userId = await getAuthUserId(ctx);
+  if (!userId) throw new Error("Unauthorized");
+
+  const profile = await ctx.db
+    .query("adminProfiles")
+    .withIndex("by_userId", (q: any) => q.eq("userId", userId))
+    .first();
+
+  if (!profile) throw new Error("Unauthorized");
+  if (profile.disabled) throw new Error("Account is disabled");
+
+  return { userId, profile };
+}
 
 /**
  * Get current user's profile and role (superadmin vs admin).
@@ -27,15 +42,9 @@ export const getCurrentProfile = query({
 export const listAdmins = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Unauthorized");
+    const { profile } = await requireAdmin(ctx);
 
-    const caller = await ctx.db
-      .query("adminProfiles")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
-      .first();
-
-    if (!caller || caller.role !== "superadmin") {
+    if (profile.role !== "superadmin") {
       throw new Error("Only Superadmin can list admins");
     }
 
@@ -51,7 +60,7 @@ export const isSystemInitialized = query({
   handler: async (ctx) => {
     const existingSuperadmin = await ctx.db
       .query("adminProfiles")
-      .filter((q) => q.eq(q.field("role"), "superadmin"))
+      .withIndex("by_role", (q) => q.eq("role", "superadmin"))
       .first();
     return !!existingSuperadmin;
   },
@@ -71,7 +80,7 @@ export const initSuperadmin = mutation({
 
     const existingSuperadmin = await ctx.db
       .query("adminProfiles")
-      .filter((q) => q.eq(q.field("role"), "superadmin"))
+      .withIndex("by_role", (q) => q.eq("role", "superadmin"))
       .first();
 
     if (existingSuperadmin) {
@@ -93,39 +102,31 @@ export const initSuperadmin = mutation({
   },
 });
 
+export const checkUsernameTaken = query({
+  args: { username: v.string() },
+  handler: async (ctx, args) => {
+    const { profile } = await requireAdmin(ctx);
+    if (profile.role !== "superadmin") throw new Error("Unauthorized");
+    
+    const existing = await ctx.db
+      .query("adminProfiles")
+      .withIndex("by_username", (q) => q.eq("username", args.username))
+      .first();
+    return !!existing;
+  }
+});
+
 /**
  * Internal mutation to insert the admin profile record once auth account is created.
  */
-export const insertAdminProfile = mutation({
+export const insertAdminProfile = internalMutation({
   args: {
     userId: v.id("users"),
     username: v.string(),
     displayName: v.string(),
   },
   handler: async (ctx, args) => {
-    const callerId = await getAuthUserId(ctx);
-    if (!callerId) throw new Error("Unauthorized");
-
-    const caller = await ctx.db
-      .query("adminProfiles")
-      .withIndex("by_userId", (q) => q.eq("userId", callerId))
-      .first();
-
-    if (!caller || caller.role !== "superadmin") {
-      throw new Error("Only Superadmin can create admin accounts");
-    }
-
     const cleanUsername = args.username.trim().toLowerCase();
-
-    // Check if username already exists in profiles
-    const existing = await ctx.db
-      .query("adminProfiles")
-      .withIndex("by_username", (q) => q.eq("username", cleanUsername))
-      .first();
-
-    if (existing) {
-      throw new Error(`Username "${cleanUsername}" is already taken`);
-    }
 
     const profileId = await ctx.db.insert("adminProfiles", {
       userId: args.userId,
@@ -150,15 +151,22 @@ export const createAdminUser = action({
     password: v.string(),
   },
   handler: async (ctx, args): Promise<string> => {
-    const callerId = await getAuthUserId(ctx);
-    if (!callerId) throw new Error("Unauthorized");
-
     const cleanUsername = args.username.trim().toLowerCase();
+    
+    // Check permissions and username availability first
+    const isTaken = await ctx.runQuery(api.admins.checkUsernameTaken, { 
+      username: cleanUsername 
+    });
+    
+    if (isTaken) {
+      throw new Error(`Username "${cleanUsername}" is already taken`);
+    }
+
     if (!cleanUsername || cleanUsername.length < 3) {
       throw new Error("Username must be at least 3 characters");
     }
-    if (!args.password || args.password.length < 6) {
-      throw new Error("Password must be at least 6 characters");
+    if (!args.password || args.password.length < 8) {
+      throw new Error("Password must be at least 8 characters");
     }
 
     const emailIdentifier = cleanUsername.includes("@")
@@ -181,7 +189,7 @@ export const createAdminUser = action({
     });
 
     // 2. Insert admin profile record linked to the created user ID
-    await ctx.runMutation(api.admins.insertAdminProfile, {
+    await ctx.runMutation(internal.admins.insertAdminProfile, {
       userId: user._id as any,
       username: cleanUsername,
       displayName: args.displayName.trim(),
@@ -200,15 +208,9 @@ export const toggleAdminStatus = mutation({
     disabled: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const callerId = await getAuthUserId(ctx);
-    if (!callerId) throw new Error("Unauthorized");
+    const { profile: caller } = await requireAdmin(ctx);
 
-    const caller = await ctx.db
-      .query("adminProfiles")
-      .withIndex("by_userId", (q) => q.eq("userId", callerId))
-      .first();
-
-    if (!caller || caller.role !== "superadmin") {
+    if (caller.role !== "superadmin") {
       throw new Error("Only Superadmin can modify admin accounts");
     }
 

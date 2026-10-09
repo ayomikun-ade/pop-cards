@@ -15,7 +15,8 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_userId", ["userId"])
-    .index("by_username", ["username"]),
+    .index("by_username", ["username"])
+    .index("by_role", ["role"]),
 
   // Batches configured by admins
   batches: defineTable({

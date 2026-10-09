@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useConvex } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { BatchConfig, CardMemberData, TemplateId } from "../types";
 import { TEMPLATES } from "../templates";
 import { ImageCropperModal } from "./ImageCropperModal";
@@ -11,6 +13,7 @@ import {
   CheckCircle2,
   Eye,
   EyeOff,
+  Loader2,
 } from "lucide-react";
 
 interface MemberCardFormProps {
@@ -26,12 +29,14 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
   onChange,
   onTemplateChange,
 }) => {
+  const convex = useConvex();
   const [cropperOpen, setCropperOpen] = useState(false);
   const [rawImageSrc, setRawImageSrc] = useState<string | null>(null);
   const [excoCodeInput, setExcoCodeInput] = useState("");
   const [showExcoInput, setShowExcoInput] = useState(false);
   const [isExcoUnlocked, setIsExcoUnlocked] = useState(false);
   const [excoError, setExcoError] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const activeTemplate =
     TEMPLATES[batch.templateId] || TEMPLATES["classic-wave"];
@@ -52,13 +57,27 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
     onChange({ photoUrl: croppedDataUrl });
   };
 
-  const handleVerifyExcoCode = () => {
-    // Basic frontend check for now (Convex server mutation will back this in Phase 2)
-    if (excoCodeInput.trim().length >= 3) {
-      setIsExcoUnlocked(true);
-      setExcoError(false);
-    } else {
+  const handleVerifyExcoCode = async () => {
+    if (excoCodeInput.trim().length < 1) return;
+    
+    setIsVerifying(true);
+    setExcoError(false);
+    
+    try {
+      const isValid = await convex.query(api.batches.verifyExcoCode, {
+        slug: batch.slug,
+        code: excoCodeInput,
+      });
+      
+      if (isValid) {
+        setIsExcoUnlocked(true);
+      } else {
+        setExcoError(true);
+      }
+    } catch (e) {
       setExcoError(true);
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -247,9 +266,14 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
               <button
                 type="button"
                 onClick={handleVerifyExcoCode}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold transition cursor-pointer"
+                disabled={isVerifying}
+                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold transition cursor-pointer flex items-center justify-center min-w-[90px] disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                Unlock Exco
+                {isVerifying ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Unlock Exco"
+                )}
               </button>
               {excoError && (
                 <span className="text-[11px] text-red-500">Invalid code</span>
