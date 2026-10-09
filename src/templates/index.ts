@@ -1,6 +1,6 @@
 import { TemplateId } from "../types";
 import { RenderContext, renderClassicWave } from "./classicWave";
-import { renderBoldSplit } from "./boldSplit";
+// import { renderBoldSplit } from "./boldSplit";
 import { renderPolaroid } from "./polaroid";
 import { renderSpotlight } from "./spotlight";
 import { ensureFontsLoaded } from "../utils/canvasHelpers";
