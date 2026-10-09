@@ -1,4 +1,4 @@
-﻿# POPCards 🎓🇳🇬
+# POPCards 🎓🇳🇬
 
 > **Zero-cost, zero-maintenance Passing-Out Profile (POP) Card generator designed specifically for National Youth Service Corps (NYSC) CDS Groups across Nigeria.**
 
