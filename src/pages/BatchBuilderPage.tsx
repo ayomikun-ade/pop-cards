@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useNavigate, useParams, Link, useSearchParams } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+  Link,
+  useSearchParams,
+} from "react-router-dom";
 import { PRESET_PALETTES } from "../utils/palettes";
 import { TEMPLATES } from "../templates";
 import { TemplateId } from "../types";
@@ -28,12 +33,12 @@ export const BatchBuilderPage: React.FC = () => {
   const isEditing = !!id && id !== "new";
   const existingBatch = useQuery(
     api.batches.getBatchById,
-    isEditing ? { id: id as any } : "skip"
+    isEditing ? { id: id as any } : "skip",
   );
-  
+
   const duplicateBatch = useQuery(
     api.batches.getBatchById,
-    duplicateFromId && !isEditing ? { id: duplicateFromId as any } : "skip"
+    duplicateFromId && !isEditing ? { id: duplicateFromId as any } : "skip",
   );
 
   const saveBatch = useMutation(api.batches.saveBatch);
@@ -56,16 +61,70 @@ export const BatchBuilderPage: React.FC = () => {
 
   // Default fields toggles
   const [defaultFields, setDefaultFields] = useState<
-    { key: string; label: string; enabled: boolean; required: boolean; maxLength: number }[]
+    {
+      key: string;
+      label: string;
+      enabled: boolean;
+      required: boolean;
+      maxLength: number;
+    }[]
   >([
-    { key: "role", label: "CDS Role", enabled: true, required: false, maxLength: 30 },
-    { key: "skills", label: "Skills", enabled: true, required: false, maxLength: 60 },
-    { key: "tiktok", label: "TikTok", enabled: true, required: false, maxLength: 25 },
-    { key: "instagram", label: "Instagram", enabled: true, required: false, maxLength: 25 },
-    { key: "x", label: "X (Twitter)", enabled: false, required: false, maxLength: 25 },
-    { key: "hobbies", label: "Hobbies", enabled: true, required: false, maxLength: 60 },
-    { key: "afterPop", label: "After POP?", enabled: true, required: false, maxLength: 85 },
-    { key: "quote", label: "Fav Quote / Motto", enabled: true, required: false, maxLength: 115 },
+    {
+      key: "role",
+      label: "CDS Role",
+      enabled: true,
+      required: false,
+      maxLength: 30,
+    },
+    {
+      key: "skills",
+      label: "Skills",
+      enabled: true,
+      required: false,
+      maxLength: 60,
+    },
+    {
+      key: "tiktok",
+      label: "TikTok",
+      enabled: true,
+      required: false,
+      maxLength: 25,
+    },
+    {
+      key: "instagram",
+      label: "Instagram",
+      enabled: true,
+      required: false,
+      maxLength: 25,
+    },
+    {
+      key: "x",
+      label: "X (Twitter)",
+      enabled: false,
+      required: false,
+      maxLength: 25,
+    },
+    {
+      key: "hobbies",
+      label: "Hobbies",
+      enabled: true,
+      required: false,
+      maxLength: 60,
+    },
+    {
+      key: "afterPop",
+      label: "After POP?",
+      enabled: true,
+      required: false,
+      maxLength: 85,
+    },
+    {
+      key: "quote",
+      label: "Fav Quote / Motto",
+      enabled: true,
+      required: false,
+      maxLength: 115,
+    },
   ]);
 
   // Custom fields
@@ -132,9 +191,13 @@ export const BatchBuilderPage: React.FC = () => {
           .then((res) => res.blob())
           .then((blob) => {
             const ext = blob.type.split("/")[1] || "png";
-            setLogoFile(new File([blob], `duplicated-logo.${ext}`, { type: blob.type }));
+            setLogoFile(
+              new File([blob], `duplicated-logo.${ext}`, { type: blob.type }),
+            );
           })
-          .catch((err) => console.warn("Failed to fetch duplicated logo:", err));
+          .catch((err) =>
+            console.warn("Failed to fetch duplicated logo:", err),
+          );
       }
     }
   }, [duplicateBatch, isEditing]);
@@ -153,13 +216,13 @@ export const BatchBuilderPage: React.FC = () => {
   const handleAddCustomField = () => {
     if (customFields.length >= 5) {
       setErrorMessage("Maximum 5 custom fields allowed per batch");
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
     const newId = `custom_${Date.now()}`;
     setCustomFields([
       ...customFields,
-      { id: newId, label: "State Code", required: false, maxLength: 40 },
+      { id: newId, label: "NYSC Experience", required: false, maxLength: 60 },
     ]);
   };
 
@@ -212,7 +275,9 @@ export const BatchBuilderPage: React.FC = () => {
       navigate("/admin");
     } catch (err: any) {
       console.error("Save batch error:", err);
-      setErrorMessage(err?.message || "Failed to save batch. Please try again.");
+      setErrorMessage(
+        err?.message || "Failed to save batch. Please try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -222,7 +287,9 @@ export const BatchBuilderPage: React.FC = () => {
   // Socials (tiktok, instagram, x) render together under one single unified row on the card,
   // so having any social platform enabled counts as just 1 slot on the card canvas.
   const hasSocialsEnabled = defaultFields.some(
-    (f) => (f.key === "tiktok" || f.key === "instagram" || f.key === "x") && f.enabled
+    (f) =>
+      (f.key === "tiktok" || f.key === "instagram" || f.key === "x") &&
+      f.enabled,
   );
   const nonSocialDefaultFieldsActive = defaultFields.filter(
     (f) =>
@@ -230,9 +297,11 @@ export const BatchBuilderPage: React.FC = () => {
       f.key !== "role" &&
       f.key !== "tiktok" &&
       f.key !== "instagram" &&
-      f.key !== "x"
+      f.key !== "x",
   ).length;
-  const isRoleActive = defaultFields.find((f) => f.key === "role")?.enabled ? 1 : 0;
+  const isRoleActive = defaultFields.find((f) => f.key === "role")?.enabled
+    ? 1
+    : 0;
 
   const activeFieldsCount =
     nonSocialDefaultFieldsActive +
@@ -256,7 +325,9 @@ export const BatchBuilderPage: React.FC = () => {
               <h1 className="text-base font-black text-slate-900">
                 {isEditing ? "Edit Batch" : "Create New Batch"}
               </h1>
-              <p className="text-[11px] text-slate-400">Configure branding and fields</p>
+              <p className="text-[11px] text-slate-400">
+                Configure branding and fields
+              </p>
             </div>
           </div>
 
@@ -356,7 +427,10 @@ export const BatchBuilderPage: React.FC = () => {
                 onChange={(e) => setIsActive(e.target.checked)}
                 className="w-5 h-5 rounded-md accent-emerald-600 cursor-pointer"
               />
-              <label htmlFor="activeToggle" className="text-xs font-bold text-slate-800 cursor-pointer">
+              <label
+                htmlFor="activeToggle"
+                className="text-xs font-bold text-slate-800 cursor-pointer"
+              >
                 Submissions Open (Accepting card entries)
               </label>
             </div>
@@ -422,7 +496,9 @@ export const BatchBuilderPage: React.FC = () => {
                     {/* Template Info */}
                     <div className="flex flex-col gap-1 px-1">
                       <div className="flex items-center justify-between">
-                        <span className={`font-bold text-xs ${isSelected ? "text-emerald-950 font-black" : "text-slate-800"}`}>
+                        <span
+                          className={`font-bold text-xs ${isSelected ? "text-emerald-950 font-black" : "text-slate-800"}`}
+                        >
                           {tmpl.name}
                         </span>
                         {isSelected && (
@@ -497,7 +573,9 @@ export const BatchBuilderPage: React.FC = () => {
               )}
               <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 cursor-pointer transition">
                 <Upload className="w-4 h-4 text-emerald-600" />
-                <span>{logoFile ? logoFile.name : "Upload CDS Logo (PNG/SVG)"}</span>
+                <span>
+                  {logoFile ? logoFile.name : "Upload CDS Logo (PNG/SVG)"}
+                </span>
                 <input
                   type="file"
                   accept="image/png,image/svg+xml,image/jpeg"
@@ -516,9 +594,12 @@ export const BatchBuilderPage: React.FC = () => {
         <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 flex flex-col gap-6">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">3. Form Fields Builder</h2>
+              <h2 className="text-lg font-bold text-slate-900">
+                3. Form Fields Builder
+              </h2>
               <p className="text-xs text-slate-500">
-                Toggle default fields or add custom fields. Max 9 total display rows per card.
+                Toggle default fields or add custom fields. Max 9 total display
+                rows per card.
               </p>
             </div>
             <span
@@ -556,7 +637,9 @@ export const BatchBuilderPage: React.FC = () => {
                     className="text-xs font-bold text-slate-800 cursor-pointer flex items-center gap-2"
                   >
                     <span>{df.label}</span>
-                    {(df.key === "tiktok" || df.key === "instagram" || df.key === "x") && (
+                    {(df.key === "tiktok" ||
+                      df.key === "instagram" ||
+                      df.key === "x") && (
                       <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
                         Shares Socials slot
                       </span>
@@ -604,19 +687,53 @@ export const BatchBuilderPage: React.FC = () => {
             {customFields.map((cf, idx) => (
               <div
                 key={cf.id}
-                className="p-3 rounded-2xl border border-slate-200 bg-slate-50/50 flex items-center gap-3"
+                className="p-3 rounded-2xl border border-slate-200 bg-slate-50/50 flex flex-wrap sm:flex-nowrap items-center gap-3"
               >
-                <input
-                  type="text"
-                  value={cf.label}
-                  onChange={(e) => {
-                    const updated = [...customFields];
-                    updated[idx].label = e.target.value;
-                    setCustomFields(updated);
-                  }}
-                  placeholder="Field label e.g. Nickname"
-                  className="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold outline-hidden"
-                />
+                <div className="relative flex-1 min-w-[180px]">
+                  <input
+                    type="text"
+                    value={cf.label}
+                    maxLength={30}
+                    onChange={(e) => {
+                      const updated = [...customFields];
+                      updated[idx].label = e.target.value;
+                      setCustomFields(updated);
+                    }}
+                    placeholder="Field label e.g. Nickname"
+                    className="w-full pl-3 pr-12 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold outline-hidden focus:border-emerald-600"
+                  />
+                  <span className="absolute right-2.5 top-2 text-[10px] font-medium text-slate-400 pointer-events-none">
+                    {cf.label.length}/30
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
+                  <span>Max chars:</span>
+                  <input
+                    type="number"
+                    min={10}
+                    max={120}
+                    value={cf.maxLength}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value, 10);
+                      const updated = [...customFields];
+                      updated[idx].maxLength = isNaN(val) ? 60 : val;
+                      setCustomFields(updated);
+                    }}
+                    onBlur={() => {
+                      const updated = [...customFields];
+                      const clamped = Math.min(
+                        120,
+                        Math.max(10, updated[idx].maxLength || 60),
+                      );
+                      updated[idx].maxLength = clamped;
+                      setCustomFields(updated);
+                    }}
+                    className="w-16 px-2 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 text-center outline-hidden focus:border-emerald-600"
+                    title="Maximum characters members can type (10–120)"
+                  />
+                </div>
+
                 <label className="text-[11px] font-semibold text-slate-500 flex items-center gap-1 cursor-pointer">
                   <input
                     type="checkbox"
@@ -632,7 +749,9 @@ export const BatchBuilderPage: React.FC = () => {
                 </label>
                 <button
                   type="button"
-                  onClick={() => setCustomFields(customFields.filter((_, i) => i !== idx))}
+                  onClick={() =>
+                    setCustomFields(customFields.filter((_, i) => i !== idx))
+                  }
                   className="p-1.5 text-slate-400 hover:text-red-500 transition cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -695,11 +814,15 @@ export const BatchBuilderPage: React.FC = () => {
                 >
                   <span>{ro.label}</span>
                   {ro.isExco && (
-                    <span className="text-[10px] text-amber-600 font-extrabold">★ Exco</span>
+                    <span className="text-[10px] text-amber-600 font-extrabold">
+                      ★ Exco
+                    </span>
                   )}
                   <button
                     type="button"
-                    onClick={() => setRoleOptions(roleOptions.filter((_, i) => i !== idx))}
+                    onClick={() =>
+                      setRoleOptions(roleOptions.filter((_, i) => i !== idx))
+                    }
                     className="text-slate-400 hover:text-red-500 ml-1 cursor-pointer"
                   >
                     ×

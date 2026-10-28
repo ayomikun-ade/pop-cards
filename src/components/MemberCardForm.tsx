@@ -468,28 +468,37 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
       )}
 
       {/* 9. Custom Batch Fields (if any defined by admin) */}
-      {batch.customFields.map((cf) => (
-        <div key={cf.id} className="flex flex-col gap-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-700">
-            {cf.label} {cf.required && "*"}
-          </label>
-          <input
-            type="text"
-            value={member.customValues?.[cf.id] || ""}
-            maxLength={cf.maxLength || 45}
-            onChange={(e) =>
-              onChange({
-                customValues: {
-                  ...(member.customValues || {}),
-                  [cf.id]: e.target.value,
-                },
-              })
-            }
-            placeholder={cf.placeholder || `Enter ${cf.label}`}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-slate-800 text-sm outline-hidden"
-          />
-        </div>
-      ))}
+      {batch.customFields.map((cf) => {
+        const limit = cf.maxLength || 60;
+        const val = member.customValues?.[cf.id] || "";
+        return (
+          <div key={cf.id} className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex justify-between">
+              <span>
+                {cf.label} {cf.required && "*"}
+              </span>
+              <span className="text-[11px] font-normal text-slate-400">
+                {val.length}/{limit}
+              </span>
+            </label>
+            <input
+              type="text"
+              value={val}
+              maxLength={limit}
+              onChange={(e) =>
+                onChange({
+                  customValues: {
+                    ...(member.customValues || {}),
+                    [cf.id]: e.target.value,
+                  },
+                })
+              }
+              placeholder={cf.placeholder || `Enter ${cf.label}`}
+              className="px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-slate-800 text-sm outline-hidden"
+            />
+          </div>
+        );
+      })}
 
       {/* Privacy Guarantee Note */}
       <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-100 flex items-start gap-3 text-xs text-emerald-800">
