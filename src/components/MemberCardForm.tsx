@@ -37,6 +37,12 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
   const [isExcoUnlocked, setIsExcoUnlocked] = useState(false);
   const [excoError, setExcoError] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [skillsInput, setSkillsInput] = useState(() =>
+    (member.skills || []).join(", ")
+  );
+  const [hobbiesInput, setHobbiesInput] = useState(() =>
+    (member.hobbies || []).join(", ")
+  );
 
   const activeTemplate =
     TEMPLATES[batch.templateId] || TEMPLATES["classic-wave"];
@@ -294,15 +300,20 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
           </label>
           <input
             type="text"
-            value={(member.skills || []).join(", ")}
+            value={skillsInput}
             maxLength={60}
             onChange={(e) => {
-              const items = e.target.value
+              const raw = e.target.value;
+              setSkillsInput(raw);
+              const items = raw
                 .split(",")
                 .map((s) => s.trim())
                 .filter(Boolean)
                 .slice(0, 5);
               onChange({ skills: items });
+            }}
+            onBlur={() => {
+              setSkillsInput((member.skills || []).join(", "));
             }}
             placeholder="e.g. Graphic Design, Public Speaking, UI/UX"
             className="px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-slate-800 text-sm outline-hidden"
@@ -393,15 +404,20 @@ export const MemberCardForm: React.FC<MemberCardFormProps> = ({
           </label>
           <input
             type="text"
-            value={(member.hobbies || []).join(", ")}
+            value={hobbiesInput}
             maxLength={60}
             onChange={(e) => {
-              const items = e.target.value
+              const raw = e.target.value;
+              setHobbiesInput(raw);
+              const items = raw
                 .split(",")
                 .map((s) => s.trim())
                 .filter(Boolean)
                 .slice(0, 5);
               onChange({ hobbies: items });
+            }}
+            onBlur={() => {
+              setHobbiesInput((member.hobbies || []).join(", "));
             }}
             placeholder="e.g. Cooking, Traveling, Reading, Music"
             className="px-4 py-2.5 rounded-xl border border-slate-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 text-slate-800 text-sm outline-hidden"

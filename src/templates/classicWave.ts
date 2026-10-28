@@ -217,7 +217,11 @@ export async function renderClassicWave({
 
   const nameBlockHeight = nameLines.length * nameLineHeight + 20; // name text + gap to divider
 
-  const visibleFields = displayFields.slice(0, 7);
+  const visibleFields = displayFields.slice(0, 9);
+  const isCompact = visibleFields.length >= 8;
+  const labelFontSize = isCompact ? 18 : 20;
+  const labelHeight = isCompact ? 23 : 26;
+  const socialRowHeight = isCompact ? 32 : 36;
   const baseGap =
     visibleFields.length <= 4
       ? 32
@@ -225,13 +229,19 @@ export async function renderClassicWave({
         ? 26
         : visibleFields.length === 6
           ? 20
-          : 16;
+          : visibleFields.length === 7
+            ? 16
+            : visibleFields.length === 8
+              ? 13
+              : 10;
 
   // Pre-calculate total height of right column (Name + Divider + Fields) to center against photo
   let totalFieldsHeight = nameBlockHeight + 16; // name + divider space
   const measuredItems: {
     field: (typeof visibleFields)[0];
     lines: string[];
+    fontSize: number;
+    lineHeight: number;
     isSocial: boolean;
     isQuote: boolean;
     blockHeight: number;
@@ -242,53 +252,61 @@ export async function renderClassicWave({
       continue;
 
     if (field.socials && field.socials.length > 0) {
-      const blockHeight = 26 + 36;
+      const blockHeight = labelHeight + socialRowHeight;
       measuredItems.push({
         field,
         lines: [],
+        fontSize: isCompact ? 22 : 24,
+        lineHeight: socialRowHeight,
         isSocial: true,
         isQuote: false,
         blockHeight,
       });
       totalFieldsHeight += blockHeight + baseGap;
     } else if (field.isQuote) {
-      ctx.font = "500 24px Inter, sans-serif";
+      const initialQuoteFont = isCompact ? 22 : 24;
+      ctx.font = `500 ${initialQuoteFont}px Inter, sans-serif`;
       const quoteText = `"${field.value.replace(/^["“”]|["“”]$/g, "").trim()}"`;
-      const { lines, lineHeight } = fitAndWrapText(
+      const { lines, fontSize, lineHeight } = fitAndWrapText(
         ctx,
         quoteText,
         contentWidth,
-        3,
-        24,
-        18,
+        isCompact ? 2 : 3,
+        initialQuoteFont,
+        17,
         "Inter, sans-serif",
         "italic 500",
       );
-      const blockHeight = 26 + lines.length * lineHeight;
+      const blockHeight = labelHeight + lines.length * lineHeight;
       measuredItems.push({
         field,
         lines,
+        fontSize,
+        lineHeight,
         isSocial: false,
         isQuote: true,
         blockHeight,
       });
       totalFieldsHeight += blockHeight + baseGap;
     } else {
-      ctx.font = "600 26px Inter, sans-serif";
-      const { lines, lineHeight } = fitAndWrapText(
+      const initialValFont = isCompact ? 23 : 25;
+      ctx.font = `600 ${initialValFont}px Inter, sans-serif`;
+      const { lines, fontSize, lineHeight } = fitAndWrapText(
         ctx,
         field.value,
         contentWidth,
         2,
-        25,
-        18,
+        initialValFont,
+        17,
         "Inter, sans-serif",
         600,
       );
-      const blockHeight = 26 + lines.length * lineHeight;
+      const blockHeight = labelHeight + lines.length * lineHeight;
       measuredItems.push({
         field,
         lines,
+        fontSize,
+        lineHeight,
         isSocial: false,
         isQuote: false,
         blockHeight,
@@ -304,7 +322,7 @@ export async function renderClassicWave({
   // Center right side vertically with respect to the photo
   const photoCenterY = photoY + photoH / 2;
   let currentY = Math.max(
-    availableTop + 15,
+    availableTop + 10,
     Math.round(photoCenterY - totalFieldsHeight / 2),
   );
 
@@ -326,19 +344,18 @@ export async function renderClassicWave({
   ctx.moveTo(fieldsX, currentY);
   ctx.lineTo(fieldsX + 80, currentY);
   ctx.stroke();
-  currentY += 22; // space before first field
+  currentY += isCompact ? 16 : 22; // space before first field
 
   for (const item of measuredItems) {
-    const { field, lines, isSocial, isQuote } = item;
+    const { field, lines, fontSize, lineHeight, isSocial, isQuote } = item;
 
     // Field Label
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
-    ctx.font = "800 20px Montserrat, Inter, sans-serif";
+    ctx.font = `800 ${labelFontSize}px Montserrat, Inter, sans-serif`;
     ctx.fillStyle = palette.headingColor;
     ctx.fillText(field.label.toUpperCase(), fieldsX, currentY);
 
-    const labelHeight = 26;
     const valueY = currentY + labelHeight;
 
     if (isSocial && field.socials) {
@@ -346,28 +363,26 @@ export async function renderClassicWave({
         ctx,
         field.socials,
         fieldsX,
-        valueY + 14,
+        valueY + (isCompact ? 12 : 14),
         palette.headingColor,
         palette.textColor,
-        24,
+        fontSize,
       );
-      currentY = valueY + 36 + baseGap;
+      currentY = valueY + socialRowHeight + baseGap;
     } else if (isQuote) {
-      ctx.font = "500 24px Inter, sans-serif";
+      ctx.font = `italic 500 ${fontSize}px Inter, sans-serif`;
       ctx.fillStyle = palette.textColor;
-      const qLineHeight = 30;
       for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], fieldsX, valueY + i * qLineHeight);
+        ctx.fillText(lines[i], fieldsX, valueY + i * lineHeight);
       }
-      currentY = valueY + lines.length * qLineHeight + baseGap;
+      currentY = valueY + lines.length * lineHeight + baseGap;
     } else {
-      ctx.font = "600 26px Inter, sans-serif";
+      ctx.font = `600 ${fontSize}px Inter, sans-serif`;
       ctx.fillStyle = palette.textColor;
-      const vLineHeight = 32;
       for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], fieldsX, valueY + i * vLineHeight);
+        ctx.fillText(lines[i], fieldsX, valueY + i * lineHeight);
       }
-      currentY = valueY + lines.length * vLineHeight + baseGap;
+      currentY = valueY + lines.length * lineHeight + baseGap;
     }
   }
 }

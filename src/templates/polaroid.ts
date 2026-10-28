@@ -76,10 +76,13 @@ export async function renderPolaroid({
   ctx.stroke();
 
   // 3. Authentic Physical Polaroid Frame
-  const polW = 680;
-  const polH = 670;
+  const visibleFields = displayFields.slice(0, 9);
+  const totalRows = Math.ceil(visibleFields.length / 2);
+
+  const polW = totalRows >= 5 ? 620 : totalRows === 4 ? 650 : 680;
+  const polH = totalRows >= 5 ? 580 : totalRows === 4 ? 620 : 670;
   const polX = (W - polW) / 2;
-  const polY = 160;
+  const polY = totalRows >= 5 ? 148 : totalRows === 4 ? 152 : 160;
 
   // Clean polaroid frame
   ctx.fillStyle = "#FFFFFF";
@@ -89,9 +92,9 @@ export async function renderPolaroid({
   ctx.strokeRect(polX, polY, polW, polH);
 
   // Polaroid photo inner area (Generous 4:3 or standard framing)
-  const innerMargin = 30;
+  const innerMargin = totalRows >= 5 ? 26 : totalRows === 4 ? 28 : 30;
   const innerW = polW - innerMargin * 2;
-  const innerH = 490;
+  const innerH = totalRows >= 5 ? 442 : totalRows === 4 ? 468 : 490;
   const innerX = polX + innerMargin;
   const innerY = polY + innerMargin;
 
@@ -133,7 +136,12 @@ export async function renderPolaroid({
   ctx.fillStyle = "#1E293B";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(nameLines[0] || nameUpper, polX + polW / 2, polY + innerH + 75);
+  const chinHeight = polH - innerMargin - innerH;
+  ctx.fillText(
+    nameLines[0] || nameUpper,
+    polX + polW / 2,
+    innerY + innerH + chinHeight / 2,
+  );
 
   // "PROUDLY SERVED" Authentic physical ink stamp overlapping lower-right corner of polaroid
   drawProudlyServedStamp(
@@ -146,13 +154,12 @@ export async function renderPolaroid({
   );
 
   // 4. Details Section (Clean authentic editorial layout - NO AI cards!)
-  const startY = polY + polH + 45;
+  const startY = polY + polH + (totalRows >= 5 ? 32 : totalRows === 4 ? 36 : 45);
+  const rowStep = totalRows >= 5 ? 96 : totalRows === 4 ? 104 : 110;
   const contentW = W - 140;
   const leftColX = 70;
   const rightColX = W / 2 + 30;
   const colW = contentW / 2 - 30;
-
-  const visibleFields = displayFields.slice(0, 6);
 
   visibleFields.forEach((field, idx) => {
     if (!field.value && (!field.socials || field.socials.length === 0)) return;
@@ -160,7 +167,7 @@ export async function renderPolaroid({
     const isLeft = idx % 2 === 0;
     const row = Math.floor(idx / 2);
     const fx = isLeft ? leftColX : rightColX;
-    const fy = startY + row * 110;
+    const fy = startY + row * rowStep;
 
     // Subtle fine hairline divider above row
     ctx.strokeStyle = "#E7E2D8";

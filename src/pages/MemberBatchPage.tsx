@@ -210,7 +210,7 @@ export const MemberBatchPage: React.FC = () => {
                   Live Card Preview
                 </span>
                 <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
-                  {displayFields.length} / 7 slots
+                  {displayFields.length} / 9 slots
                 </span>
               </div>
 

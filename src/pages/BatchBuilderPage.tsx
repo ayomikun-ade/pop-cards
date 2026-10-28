@@ -518,17 +518,17 @@ export const BatchBuilderPage: React.FC = () => {
             <div>
               <h2 className="text-lg font-bold text-slate-900">3. Form Fields Builder</h2>
               <p className="text-xs text-slate-500">
-                Toggle default fields or add custom fields. Max 7 total display rows per card.
+                Toggle default fields or add custom fields. Max 9 total display rows per card.
               </p>
             </div>
             <span
               className={`px-3 py-1 rounded-full text-xs font-bold ${
-                activeFieldsCount > 7
+                activeFieldsCount > 9
                   ? "bg-red-50 text-red-700"
                   : "bg-emerald-50 text-emerald-700"
               }`}
             >
-              {activeFieldsCount} / 7 slots active
+              {activeFieldsCount} / 9 slots active
             </span>
           </div>
 

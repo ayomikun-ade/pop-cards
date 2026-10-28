@@ -75,6 +75,6 @@ export function formatDisplayFields(
     add('FAV QUOTE', member.quote, true);
   }
 
-  // Strict enforcement: Maximum 7 fields so card never overflows
-  return fields.slice(0, 7);
+  // Strict enforcement: Maximum 9 fields so card never overflows
+  return fields.slice(0, 9);
 }

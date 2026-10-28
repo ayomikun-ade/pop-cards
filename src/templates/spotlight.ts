@@ -79,10 +79,13 @@ export async function renderSpotlight({
   ctx.stroke();
 
   // 3. Central Portrait Frame (Generous 4:5 or arched portrait - NOT a slim strip!)
-  const photoW = 440;
-  const photoH = 550;
+  const visibleFields = displayFields.slice(0, 9);
+  const totalRows = Math.ceil(visibleFields.length / 2);
+
+  const photoW = totalRows >= 5 ? 376 : totalRows === 4 ? 408 : 440;
+  const photoH = totalRows >= 5 ? 470 : totalRows === 4 ? 510 : 550;
   const photoX = (W - photoW) / 2;
-  const photoY = 160;
+  const photoY = totalRows >= 5 ? 150 : totalRows === 4 ? 154 : 160;
   const photoRadius = 16;
 
   // Crisp natural photo frame
@@ -172,12 +175,11 @@ export async function renderSpotlight({
   ctx.fillRect(W / 2 - 40, nameY + 6, 80, 3);
 
   // 5. Details Section (Clean authentic editorial two-column layout - NO AI rounded boxes!)
-  const detailsY = nameY + 30;
+  const detailsY = nameY + (totalRows >= 4 ? 24 : 30);
+  const rowStep = totalRows >= 5 ? 84 : totalRows === 4 ? 90 : 95;
   const colWidth = 440;
   const leftX = 75;
   const rightX = W / 2 + 25;
-
-  const visibleFields = displayFields.slice(0, 6);
 
   visibleFields.forEach((field, idx) => {
     if (!field.value && (!field.socials || field.socials.length === 0)) return;
@@ -185,7 +187,7 @@ export async function renderSpotlight({
     const isLeft = idx % 2 === 0;
     const row = Math.floor(idx / 2);
     const fx = isLeft ? leftX : rightX;
-    const fy = detailsY + row * 95;
+    const fy = detailsY + row * rowStep;
 
     // Subtle fine hairline divider
     ctx.strokeStyle = "#E2E8F0";
