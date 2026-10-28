@@ -216,6 +216,7 @@ export async function renderSpotlight({
         palette.primary,
         "#1E293B",
         20,
+        colWidth,
       );
     } else if (field.isQuote) {
       ctx.font = "500 20px Inter, sans-serif";

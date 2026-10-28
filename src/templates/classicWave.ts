@@ -5,7 +5,7 @@ import {
   drawRoundedRect,
   drawImageCover,
 } from "../utils/canvasHelpers";
-import { drawSocialsRow } from "../utils/drawSocialIcons";
+import { drawSocialsRow, layoutSocialsRow } from "../utils/drawSocialIcons";
 import { drawProudlyServedStamp } from "../utils/drawStamp";
 
 export interface RenderContext {
@@ -221,7 +221,6 @@ export async function renderClassicWave({
   const isCompact = visibleFields.length >= 8;
   const labelFontSize = isCompact ? 18 : 20;
   const labelHeight = isCompact ? 23 : 26;
-  const socialRowHeight = isCompact ? 32 : 36;
   const baseGap =
     visibleFields.length <= 4
       ? 32
@@ -252,12 +251,20 @@ export async function renderClassicWave({
       continue;
 
     if (field.socials && field.socials.length > 0) {
-      const blockHeight = labelHeight + socialRowHeight;
+      const initialSocialFont = isCompact ? 22 : 24;
+      const socialLayout = layoutSocialsRow(
+        ctx,
+        field.socials,
+        contentWidth,
+        initialSocialFont,
+        13,
+      );
+      const blockHeight = labelHeight + socialLayout.totalHeight;
       measuredItems.push({
         field,
         lines: [],
-        fontSize: isCompact ? 22 : 24,
-        lineHeight: socialRowHeight,
+        fontSize: initialSocialFont,
+        lineHeight: socialLayout.totalHeight,
         isSocial: true,
         isQuote: false,
         blockHeight,
@@ -359,7 +366,7 @@ export async function renderClassicWave({
     const valueY = currentY + labelHeight;
 
     if (isSocial && field.socials) {
-      drawSocialsRow(
+      const renderedHeight = drawSocialsRow(
         ctx,
         field.socials,
         fieldsX,
@@ -367,8 +374,9 @@ export async function renderClassicWave({
         palette.headingColor,
         palette.textColor,
         fontSize,
+        contentWidth,
       );
-      currentY = valueY + socialRowHeight + baseGap;
+      currentY = valueY + renderedHeight + baseGap;
     } else if (isQuote) {
       ctx.font = `italic 500 ${fontSize}px Inter, sans-serif`;
       ctx.fillStyle = palette.textColor;

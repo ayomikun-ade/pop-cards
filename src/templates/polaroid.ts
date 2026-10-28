@@ -196,6 +196,7 @@ export async function renderPolaroid({
         palette.primary,
         "#334155",
         20,
+        colW,
       );
     } else if (field.isQuote) {
       ctx.font = "500 20px Inter, sans-serif";
